@@ -1,124 +1,123 @@
-// ── Sticky nav ──
+// Sticky nav
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 10);
 }, { passive: true });
 
-// ── Hamburger menu ──
-const hamburger = document.getElementById('hamburger');
-const navLinks  = document.getElementById('nav-links');
-
-hamburger.addEventListener('click', () => {
-  const open = hamburger.classList.toggle('open');
-  navLinks.classList.toggle('open', open);
-  hamburger.setAttribute('aria-expanded', String(open));
+// Hamburger
+const burger   = document.getElementById('burger');
+const navlinks = document.getElementById('navlinks');
+burger.addEventListener('click', () => {
+  const open = burger.classList.toggle('open');
+  navlinks.classList.toggle('open', open);
+  burger.setAttribute('aria-expanded', String(open));
 });
-
-navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    navLinks.classList.remove('open');
-    hamburger.setAttribute('aria-expanded', 'false');
-  });
-});
-
+navlinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  burger.classList.remove('open');
+  navlinks.classList.remove('open');
+  burger.setAttribute('aria-expanded', 'false');
+}));
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && hamburger.classList.contains('open')) {
-    hamburger.classList.remove('open');
-    navLinks.classList.remove('open');
-    hamburger.setAttribute('aria-expanded', 'false');
+  if (e.key === 'Escape' && burger.classList.contains('open')) {
+    burger.classList.remove('open');
+    navlinks.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
   }
 });
 
-// ── Active nav link on scroll ──
-const sections = document.querySelectorAll('section[id]');
-const links    = document.querySelectorAll('.nav-links a');
-
-const sectionObserver = new IntersectionObserver(entries => {
+// Active nav link
+const sections = document.querySelectorAll('section[id], header[id]');
+const links    = document.querySelectorAll('.nav__links a');
+new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       links.forEach(l => l.classList.remove('active'));
-      const active = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
-      if (active) active.classList.add('active');
+      const a = document.querySelector(`.nav__links a[href="#${entry.target.id}"]`);
+      if (a) a.classList.add('active');
     }
   });
-}, { rootMargin: '-40% 0px -55% 0px' });
+}, { rootMargin: '-40% 0px -55% 0px' }).observe !== undefined &&
+  sections.forEach(s => new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.nav__links a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' }).observe(s));
 
-sections.forEach(s => sectionObserver.observe(s));
-
-// ── Fade-in on scroll ──
-const fadeEls = document.querySelectorAll('.fade-in');
-const fadeObserver = new IntersectionObserver(entries => {
+// Fade-in
+new IntersectionObserver((entries, obs) => {
   entries.forEach((entry, i) => {
     if (entry.isIntersecting) {
-      setTimeout(() => entry.target.classList.add('visible'), i * 80);
-      fadeObserver.unobserve(entry.target);
+      setTimeout(() => entry.target.classList.add('visible'), i * 70);
+      obs.unobserve(entry.target);
     }
   });
-}, { threshold: 0.1 });
+}, { threshold: 0.08 }).observe !== undefined &&
+  document.querySelectorAll('.fade-in').forEach(el =>
+    new IntersectionObserver((entries, obs) => {
+      if (entries[0].isIntersecting) {
+        entries[0].target.classList.add('visible');
+        obs.unobserve(entries[0].target);
+      }
+    }, { threshold: 0.08 }).observe(el)
+  );
 
-fadeEls.forEach(el => fadeObserver.observe(el));
-
-// ── FAQ accordion ──
-document.querySelectorAll('.faq-question').forEach(btn => {
+// FAQ accordion
+document.querySelectorAll('.faq__q').forEach(btn => {
   btn.addEventListener('click', () => {
-    const answer = btn.nextElementSibling;
+    const ans    = btn.nextElementSibling;
     const isOpen = btn.classList.contains('open');
-
-    document.querySelectorAll('.faq-question.open').forEach(other => {
+    document.querySelectorAll('.faq__q.open').forEach(other => {
       other.classList.remove('open');
       other.nextElementSibling.style.maxHeight = null;
     });
-
     if (!isOpen) {
       btn.classList.add('open');
-      answer.style.maxHeight = answer.scrollHeight + 'px';
+      ans.style.maxHeight = ans.scrollHeight + 'px';
     }
   });
 });
 
-// ── Contact form validation ──
+// Contact form
 const form = document.getElementById('contact-form');
 if (form) {
   const rules = {
-    name:    { el: null, error: null, validate: v => v.trim().length >= 2 ? '' : 'Veuillez indiquer votre nom et prénom.' },
-    email:   { el: null, error: null, validate: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? '' : 'Adresse e-mail invalide.' },
-    message: { el: null, error: null, validate: v => v.trim().length >= 10 ? '' : 'Votre message est trop court (10 caractères minimum).' },
+    name:    { validate: v => v.trim().length >= 2 ? '' : 'Veuillez indiquer votre nom et prénom.' },
+    email:   { validate: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? '' : 'Adresse e-mail invalide.' },
+    message: { validate: v => v.trim().length >= 10 ? '' : 'Message trop court (10 caractères minimum).' },
   };
-
-  Object.keys(rules).forEach(key => {
-    rules[key].el    = document.getElementById(key);
-    rules[key].error = document.getElementById('error-' + key);
-    if (rules[key].el) {
-      rules[key].el.addEventListener('blur', () => showError(key));
-      rules[key].el.addEventListener('input', () => { if (rules[key].error.textContent) showError(key); });
+  Object.keys(rules).forEach(k => {
+    const el  = document.getElementById(k);
+    const err = document.getElementById('err-' + k);
+    rules[k].el  = el;
+    rules[k].err = err;
+    if (el) {
+      el.addEventListener('blur',  () => showErr(k));
+      el.addEventListener('input', () => { if (err.textContent) showErr(k); });
     }
   });
-
-  function showError(key) {
-    const msg = rules[key].validate(rules[key].el.value);
-    rules[key].error.textContent = msg;
-    rules[key].el.style.borderColor = msg ? '#c0392b' : '';
-    return msg === '';
+  function showErr(k) {
+    const msg = rules[k].validate(rules[k].el.value);
+    rules[k].err.textContent = msg;
+    rules[k].el.style.borderColor = msg ? '#c0392b' : '';
+    return !msg;
   }
-
-  const successEl = document.getElementById('form-success');
-
+  const okEl = document.getElementById('form-ok');
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const valid = Object.keys(rules).map(showError).every(Boolean);
-    if (!valid) return;
-
+    if (!Object.keys(rules).map(showErr).every(Boolean)) return;
     const btn = form.querySelector('button[type="submit"]');
     btn.textContent = 'Envoi en cours…';
     btn.disabled = true;
-
     setTimeout(() => {
       btn.textContent = 'Envoyer ma demande';
       btn.disabled = false;
       form.reset();
-      successEl.classList.add('show');
-      setTimeout(() => successEl.classList.remove('show'), 6000);
+      okEl.classList.add('show');
+      setTimeout(() => okEl.classList.remove('show'), 6000);
     }, 1200);
   });
 }
