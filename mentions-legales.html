@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mentions Légales – Brow Derma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="legal.css" />
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">BROW <span>✦</span> DERMA</a>
+    <ul class="nav-links">
+      <li><a href="index.html#prestations">Prestations</a></li>
+      <li><a href="index.html#tarifs">Tarifs</a></li>
+      <li><a href="index.html#apropos">À propos</a></li>
+      <li><a href="index.html#faq">FAQ</a></li>
+    </ul>
+    <a href="index.html#contact" class="nav-cta">Réserver</a>
+  </nav>
+
+  <main class="legal">
+    <div class="legal__hero fade-in">
+      <span class="legal__eyebrow">Informations légales</span>
+      <h1>Mentions Légales</h1>
+    </div>
+
+    <div class="legal__body fade-in">
+
+      <section class="legal__section">
+        <h2>1. Éditeur du site</h2>
+        <p>Le site <strong>brow-derma.vercel.app</strong> est édité par :</p>
+        <ul>
+          <li><strong>Raison sociale :</strong> Brow Derma</li>
+          <li><strong>Statut :</strong> Auto-entrepreneur / Entreprise individuelle</li>
+          <li><strong>Nom :</strong> [Prénom NOM] <span class="legal__placeholder">— à compléter</span></li>
+          <li><strong>Numéro SIRET :</strong> [SIRET] <span class="legal__placeholder">— à compléter</span></li>
+          <li><strong>Adresse :</strong> [Adresse complète] <span class="legal__placeholder">— à compléter</span></li>
+          <li><strong>Téléphone :</strong> 06.95.93.76.52</li>
+          <li><strong>Email :</strong> <a href="mailto:browderma83@gmail.com">browderma83@gmail.com</a></li>
+        </ul>
+      </section>
+
+      <section class="legal__section">
+        <h2>2. Hébergeur</h2>
+        <ul>
+          <li><strong>Société :</strong> Vercel Inc.</li>
+          <li><strong>Adresse :</strong> 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis</li>
+          <li><strong>Site web :</strong> <a href="https://vercel.com" target="_blank" rel="noopener">vercel.com</a></li>
+        </ul>
+      </section>
+
+      <section class="legal__section">
+        <h2>3. Propriété intellectuelle</h2>
+        <p>L'ensemble des contenus présents sur ce site (textes, images, logos, icônes, graphismes) est la propriété exclusive de Brow Derma, sauf mention contraire. Toute reproduction, distribution, modification ou utilisation de ces contenus, sous quelque forme que ce soit, est strictement interdite sans autorisation écrite préalable.</p>
+      </section>
+
+      <section class="legal__section">
+        <h2>4. Responsabilité</h2>
+        <p>Brow Derma s'efforce de maintenir les informations de ce site à jour et exactes. Toutefois, aucune garantie n'est offerte quant à l'exactitude, la complétude ou l'actualité des informations présentées. Brow Derma ne saurait être tenu responsable de tout dommage direct ou indirect lié à l'utilisation de ce site.</p>
+      </section>
+
+      <section class="legal__section">
+        <h2>5. Données personnelles</h2>
+        <p>Le traitement des données personnelles collectées via ce site est décrit dans notre <a href="politique-confidentialite.html">Politique de confidentialité</a>. Conformément au RGPD et à la loi Informatique et Libertés, vous disposez de droits sur vos données personnelles.</p>
+      </section>
+
+      <section class="legal__section">
+        <h2>6. Cookies</h2>
+        <p>Ce site n'utilise pas de cookies à des fins publicitaires ou de pistage. Des cookies techniques strictement nécessaires au bon fonctionnement du site peuvent être déposés. Pour plus d'informations, consultez notre <a href="politique-confidentialite.html">Politique de confidentialité</a>.</p>
+      </section>
+
+      <section class="legal__section">
+        <h2>7. Droit applicable</h2>
+        <p>Le présent site et ses mentions légales sont soumis au droit français. En cas de litige, les tribunaux français seront seuls compétents.</p>
+      </section>
+
+      <section class="legal__section">
+        <h2>8. Contact</h2>
+        <p>Pour toute question relative aux présentes mentions légales : <a href="mailto:browderma83@gmail.com">browderma83@gmail.com</a></p>
+      </section>
+
+      <p class="legal__date">Dernière mise à jour : mai 2025</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-top">
+      <a href="index.html" class="footer-logo">BROW <span>✦</span> DERMA</a>
+      <div class="footer-links">
+        <a href="mailto:browderma83@gmail.com">Email</a>
+        <a href="https://instagram.com/brow_derma" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://facebook.com/BrowDerma" target="_blank" rel="noopener">Facebook</a>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <a href="mentions-legales.html">Mentions légales</a>
+      <span>·</span>
+      <a href="politique-confidentialite.html">Politique de confidentialité</a>
+      <span>·</span>
+      <a href="cgv.html">CGV</a>
+    </div>
+    <p class="footer-copy">© 2025 Brow Derma — Tous droits réservés</p>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

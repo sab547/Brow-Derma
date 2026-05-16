@@ -1,0 +1,172 @@
+/* ── Legal pages layout ── */
+
+.legal {
+  padding-top: calc(80px + clamp(3rem, 8vw, 6rem));
+  padding-bottom: clamp(4rem, 10vw, 8rem);
+  background: var(--ivory);
+  min-height: 100vh;
+}
+
+.legal__hero {
+  text-align: center;
+  margin-bottom: clamp(2.5rem, 6vw, 5rem);
+}
+
+.legal__eyebrow {
+  font-family: 'Jost', sans-serif;
+  font-size: .65rem;
+  font-weight: 400;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.legal__hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+.legal__body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 5vw, 3rem);
+}
+
+.legal__section {
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+  border-bottom: 1px solid var(--ink-30);
+}
+
+.legal__section:last-of-type {
+  border-bottom: none;
+}
+
+.legal__section h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+
+.legal__section h3 {
+  font-family: 'Jost', sans-serif;
+  font-size: .65rem;
+  font-weight: 400;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 1.4rem 0 0.6rem;
+}
+
+.legal__section p {
+  font-family: 'Jost', sans-serif;
+  font-size: .88rem;
+  line-height: 1.85;
+  color: var(--ink-60);
+  margin-bottom: 0.75rem;
+}
+
+.legal__section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.legal__section ul li {
+  font-family: 'Jost', sans-serif;
+  font-size: .88rem;
+  line-height: 1.75;
+  color: var(--ink-60);
+  padding-left: 1.2rem;
+  position: relative;
+  margin-bottom: 0.35rem;
+}
+
+.legal__section ul li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--blush);
+}
+
+.legal__section a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal__section a:hover {
+  color: var(--gold-lt);
+}
+
+.legal__placeholder {
+  font-size: .78rem;
+  font-style: italic;
+  color: var(--ink-60);
+  background: rgba(184,149,90,.08);
+  border: 1px dashed rgba(184,149,90,.4);
+  border-radius: 2px;
+  padding: .1rem .4rem;
+  margin-left: .3rem;
+}
+
+.legal__date {
+  font-family: 'Jost', sans-serif;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  color: var(--ink-60);
+  opacity: .5;
+  text-align: right;
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+/* Pricing table */
+.legal__table-wrap {
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid var(--ink-30);
+}
+
+.legal__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Jost', sans-serif;
+  font-size: .82rem;
+}
+
+.legal__table thead tr {
+  background: var(--ink);
+  color: var(--gold);
+}
+
+.legal__table th {
+  padding: .75rem 1rem;
+  text-align: left;
+  font-weight: 400;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: .65rem;
+  white-space: nowrap;
+}
+
+.legal__table td {
+  padding: .65rem 1rem;
+  color: var(--ink-60);
+  border-bottom: 1px solid var(--ink-30);
+}
+
+.legal__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.legal__table tbody tr:nth-child(even) {
+  background: rgba(184,149,90,.04);
+}
