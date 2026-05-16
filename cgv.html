@@ -16,11 +16,34 @@
     <ul class="nav-links">
       <li><a href="index.html#prestations">Prestations</a></li>
       <li><a href="index.html#tarifs">Tarifs</a></li>
+      <li><a href="index.html#realisations">Réalisations</a></li>
       <li><a href="index.html#apropos">À propos</a></li>
-      <li><a href="index.html#faq">FAQ</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
     </ul>
-    <a href="index.html#contact" class="nav-cta">Réserver</a>
+    <a href="index.html#rdv" class="nav-cta">Réserver</a>
+    <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <div class="nav-overlay" id="navOverlay" aria-hidden="true">
+    <div class="nav-overlay-links">
+      <a href="index.html#prestations" data-close><em>Prestations</em><span class="nav-num">01</span></a>
+      <a href="index.html#tarifs" data-close><em>Tarifs</em><span class="nav-num">02</span></a>
+      <a href="index.html#realisations" data-close><em>Réalisations</em><span class="nav-num">03</span></a>
+      <a href="index.html#apropos" data-close><em>À propos</em><span class="nav-num">04</span></a>
+      <a href="index.html#faq" data-close><em>FAQ</em><span class="nav-num">05</span></a>
+      <a href="index.html#contact" data-close><em>Contact</em><span class="nav-num">06</span></a>
+    </div>
+    <div class="nav-overlay-footer">
+      <a href="index.html#rdv" class="nav-overlay-cta" data-close>Prendre rendez-vous</a>
+      <div class="nav-overlay-contacts">
+        <a href="tel:+33695937652">06.95.93.76.52</a>
+        <a href="mailto:browderma83@gmail.com">browderma83@gmail.com</a>
+        <a href="https://instagram.com/brow_derma" target="_blank" rel="noopener">@brow_derma</a>
+      </div>
+    </div>
+  </div>
 
   <main class="legal">
     <div class="legal__hero fade-in">
@@ -196,6 +219,13 @@
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.08 });
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    const burger = document.getElementById('burger');
+    const navOverlay = document.getElementById('navOverlay');
+    const closeMenu = () => { burger.classList.remove('open'); navOverlay.classList.remove('open'); burger.setAttribute('aria-expanded','false'); navOverlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; };
+    burger.addEventListener('click', () => { if (burger.classList.contains('open')) { closeMenu(); } else { burger.classList.add('open'); navOverlay.classList.add('open'); burger.setAttribute('aria-expanded','true'); navOverlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; } });
+    navOverlay.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', closeMenu));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
   </script>
 </body>
 </html>

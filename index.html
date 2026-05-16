@@ -653,8 +653,80 @@
   .localisation-map { min-height: 400px; }
   .localisation-map iframe { width: 100%; height: 100%; border: 0; display: block; min-height: 400px; }
 
+  /* ─── BURGER ─── */
+  .burger {
+    display: none;
+    flex-direction: column; justify-content: center; gap: 5px;
+    background: none; border: none; cursor: pointer;
+    padding: 4px; z-index: 300;
+  }
+  .burger span {
+    display: block; width: 22px; height: 1.5px;
+    background: var(--ink);
+    transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .2s;
+    transform-origin: center;
+  }
+  .burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); background: var(--ivory); }
+  .burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--ivory); }
+
+  /* ─── MOBILE OVERLAY ─── */
+  .nav-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: var(--ink);
+    display: flex; flex-direction: column;
+    padding: 5.5rem 2.5rem 3rem;
+    opacity: 0; pointer-events: none;
+    transform: translateY(-12px);
+    transition: opacity .38s ease, transform .38s ease;
+  }
+  .nav-overlay.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+  .nav-overlay-links { display: flex; flex-direction: column; flex: 1; }
+  .nav-overlay-links a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 9vw, 3.2rem); font-weight: 300; line-height: 1;
+    color: rgba(253,250,246,.55); text-decoration: none;
+    padding: 1rem 0; border-bottom: 1px solid rgba(253,250,246,.1);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: color .22s;
+  }
+  .nav-overlay-links a:hover { color: var(--ivory); }
+  .nav-overlay-links a:hover .nav-num { color: var(--gold); }
+  .nav-num {
+    font-family: 'Jost', sans-serif; font-size: .55rem;
+    letter-spacing: .22em; color: rgba(253,250,246,.25);
+    transition: color .22s;
+  }
+
+  .nav-overlay-footer {
+    padding-top: 2rem; border-top: 1px solid rgba(253,250,246,.1);
+    display: flex; flex-direction: column; gap: 1.2rem;
+  }
+  .nav-overlay-cta {
+    display: block; text-align: center;
+    padding: 1rem; background: var(--gold); color: var(--ink);
+    font-family: 'Jost', sans-serif; font-size: .72rem;
+    letter-spacing: .2em; text-transform: uppercase;
+    text-decoration: none; font-weight: 400;
+    transition: background .25s;
+  }
+  .nav-overlay-cta:hover { background: var(--gold-lt); }
+  .nav-overlay-contacts {
+    display: flex; flex-wrap: wrap; gap: .6rem 2rem;
+    justify-content: center;
+  }
+  .nav-overlay-contacts a {
+    font-size: .68rem; letter-spacing: .1em;
+    color: rgba(253,250,246,.3); text-decoration: none;
+    transition: color .2s; font-family: 'Jost', sans-serif;
+  }
+  .nav-overlay-contacts a:hover { color: var(--gold); }
+
   /* mobile overrides for new sections */
   @media (max-width: 900px) {
+    .burger { display: flex; }
+    .nav-cta { display: none; }
     .realisations { padding: 4rem 1.5rem; }
     .aa-grid { grid-template-columns: 1fr; }
     .rdv-band { flex-direction: column; padding: 3rem 1.5rem; text-align: center; }
@@ -682,7 +754,30 @@
     <li><a href="#contact">Contact</a></li>
   </ul>
   <a href="#rdv" class="nav-cta">Réserver</a>
+  <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- ─── MENU OVERLAY MOBILE ─── -->
+<div class="nav-overlay" id="navOverlay" aria-hidden="true">
+  <div class="nav-overlay-links">
+    <a href="#prestations" data-close><em>Prestations</em><span class="nav-num">01</span></a>
+    <a href="#tarifs" data-close><em>Tarifs</em><span class="nav-num">02</span></a>
+    <a href="#realisations" data-close><em>Réalisations</em><span class="nav-num">03</span></a>
+    <a href="#apropos" data-close><em>À propos</em><span class="nav-num">04</span></a>
+    <a href="#faq" data-close><em>FAQ</em><span class="nav-num">05</span></a>
+    <a href="#contact" data-close><em>Contact</em><span class="nav-num">06</span></a>
+  </div>
+  <div class="nav-overlay-footer">
+    <a href="#rdv" class="nav-overlay-cta" data-close>Prendre rendez-vous</a>
+    <div class="nav-overlay-contacts">
+      <a href="tel:+33695937652">06.95.93.76.52</a>
+      <a href="mailto:browderma83@gmail.com">browderma83@gmail.com</a>
+      <a href="https://instagram.com/brow_derma" target="_blank" rel="noopener">@brow_derma</a>
+    </div>
+  </div>
+</div>
 
 <!-- ─── HERO ─── -->
 <section class="hero" id="accueil">
@@ -1312,10 +1407,32 @@
     });
   });
 
+  // Burger menu
+  const burger = document.getElementById('burger');
+  const navOverlay = document.getElementById('navOverlay');
+  function openMenu() {
+    burger.classList.add('open');
+    navOverlay.classList.add('open');
+    burger.setAttribute('aria-expanded', 'true');
+    navOverlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    burger.classList.remove('open');
+    navOverlay.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+    navOverlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  burger.addEventListener('click', () => burger.classList.contains('open') ? closeMenu() : openMenu());
+  navOverlay.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
   // Nav shrink on scroll
   const nav = document.querySelector('nav');
   window.addEventListener('scroll', () => {
-    nav.style.padding = window.scrollY > 60 ? '.9rem 3rem' : '1.4rem 3rem';
+    if (window.innerWidth > 900)
+      nav.style.padding = window.scrollY > 60 ? '.9rem 3rem' : '1.4rem 3rem';
   }, { passive: true });
 
   // Contact form
