@@ -551,6 +551,21 @@
     font-size: .88rem; color: var(--gold); font-style: italic;
   }
 
+  /* Real combined before/after photo card */
+  .aa-photo-full { width: 100%; height: 100%; position: relative; overflow: hidden; }
+  .aa-real-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .aa-photo-labels {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; padding: .8rem;
+    pointer-events: none;
+  }
+  .aa-tag-before { background: rgba(0,0,0,.5); color: rgba(255,255,255,.7); }
+  .aa-tag-after  { background: rgba(184,149,90,.35); color: var(--gold-lt); }
+
+  /* Nav logo image */
+  .nav-logo { display: inline-flex; align-items: center; gap: .5rem; }
+  .nav-logo-img { height: 34px; width: auto; display: block; }
+
   /* placeholder silhouette when no photo */
   .aa-before::before, .aa-after::before {
     content: '';
@@ -745,7 +760,10 @@
 
 <!-- ─── NAV ─── -->
 <nav>
-  <a href="#accueil" class="nav-logo">BROW <span>✦</span> DERMA</a>
+  <a href="#accueil" class="nav-logo">
+    <img src="images/logo.png" alt="" class="nav-logo-img" onerror="this.style.display='none'">
+    BROW <span>✦</span> DERMA
+  </a>
   <ul class="nav-links">
     <li><a href="#prestations">Prestations</a></li>
     <li><a href="#tarifs">Tarifs</a></li>
@@ -855,7 +873,7 @@
         <div class="spec-row"><span class="spec-key">Effet</span><span class="spec-val">Naturel / poil à poil</span></div>
         <div class="spec-row"><span class="spec-key">Tenue</span><span class="spec-val">12 – 18 mois</span></div>
         <div class="spec-row"><span class="spec-key">Cicatrisation</span><span class="spec-val">7 à 10 jours</span></div>
-        <div class="spec-row"><span class="spec-key">Retouche fixatrice</span><span class="spec-val">Incluse</span></div>
+        <div class="spec-row"><span class="spec-key">Retouche à 6–8 sem.</span><span class="spec-val">Incluse</span></div>
       </div>
     </div>
 
@@ -870,8 +888,8 @@
       <div class="presta-specs">
         <div class="spec-row"><span class="spec-key">Effet</span><span class="spec-val">Poudré / ombré</span></div>
         <div class="spec-row"><span class="spec-key">Tenue</span><span class="spec-val">18 – 24 mois</span></div>
-        <div class="spec-row"><span class="spec-key">Cicatrisation</span><span class="spec-val">Progressive</span></div>
-        <div class="spec-row"><span class="spec-key">Retouche fixatrice</span><span class="spec-val">Incluse</span></div>
+        <div class="spec-row"><span class="spec-key">Cicatrisation</span><span class="spec-val">7 à 10 jours</span></div>
+        <div class="spec-row"><span class="spec-key">Retouche à 6–8 sem.</span><span class="spec-val">Incluse</span></div>
       </div>
     </div>
 
@@ -886,7 +904,7 @@
       <div class="presta-specs">
         <div class="spec-row"><span class="spec-key">Effet</span><span class="spec-val">Naturel structuré</span></div>
         <div class="spec-row"><span class="spec-key">Tenue</span><span class="spec-val">12 – 24 mois</span></div>
-        <div class="spec-row"><span class="spec-key">Technique</span><span class="spec-val">Poil à poil + poudré</span></div>
+        <div class="spec-row"><span class="spec-key">Cicatrisation</span><span class="spec-val">7 à 10 jours</span></div>
         <div class="spec-row"><span class="spec-key">Retouche à 6–8 sem.</span><span class="spec-val">Incluse</span></div>
       </div>
     </div>
@@ -979,7 +997,7 @@
 <!-- ─── CICATRISATION ─── -->
 <section class="cicatrisation">
   <div class="section-header reveal">
-    <span class="section-label">Ce à quoi s'attendre</span>
+    <span class="section-label">À quoi s'attendre</span>
     <h2 class="section-title">La <em>cicatrisation</em></h2>
     <span class="gold-rule"></span>
   </div>
@@ -987,7 +1005,7 @@
     <div class="phase reveal">
       <span class="phase-day">J1</span>
       <p class="phase-emotion">« Oh là là, j'adore ! »</p>
-      <p class="phase-note">Un peu foncé, mais le résultat est immédiat et encourageant.</p>
+      <p class="phase-note">Le résultat immédiat est toujours un peu foncé, cela va s'éclaircir.</p>
     </div>
     <div class="phase reveal" style="transition-delay:.08s">
       <span class="phase-day">J2 – J5</span>
@@ -1012,7 +1030,7 @@
     <div class="phase reveal" style="transition-delay:.4s">
       <span class="phase-day">Après retouche ✦</span>
       <p class="phase-emotion">Parfait.</p>
-      <p class="phase-note">La retouche fixatrice peaufine tracé et couleur. Le résultat final est là.</p>
+      <p class="phase-note">La retouche fixatrice permet d'harmoniser le tracé et de stabiliser le résultat final.</p>
     </div>
   </div>
 </section>
@@ -1027,14 +1045,14 @@
   <div class="faq-grid">
     <div class="faq-item">
       <button class="faq-q">Est-ce douloureux ?<span class="faq-icon">+</span></button>
-      <p class="faq-a">La sensation reste très supportable pour la majorité des clientes. Un produit anesthésiant est appliqué avant la prestation pour maximiser le confort.</p>
+      <p class="faq-a">La sensation reste très supportable pour la majorité des clientes.</p>
     </div>
     <div class="faq-item">
       <button class="faq-q">Le résultat reste-t-il très foncé ?<span class="faq-icon">+</span></button>
-      <p class="faq-a">Non. Après la cicatrisation, le résultat s'éclaircit naturellement d'environ 30 à 40 %. La retouche fixatrice vient ensuite peaufiner la couleur définitive.</p>
+      <p class="faq-a">Non. Après la cicatrisation, le résultat s'éclaircit naturellement d'environ 30 à 40 %. La retouche fixatrice permet ensuite d'harmoniser et stabiliser le résultat final.</p>
     </div>
     <div class="faq-item">
-      <button class="faq-q">Peut-on faire ça en été ?<span class="faq-icon">+</span></button>
+      <button class="faq-q">Peut-on faire un maquillage permanent en été ?<span class="faq-icon">+</span></button>
       <p class="faq-a">Oui, à condition de respecter les consignes de cicatrisation et d'éviter soleil, piscine et mer pendant quelques jours.</p>
     </div>
     <div class="faq-item">
@@ -1042,7 +1060,7 @@
       <p class="faq-a">Microblading : 12 à 18 mois. Poudré : 18 à 24 mois. La tenue varie selon le type de peau et le mode de vie.</p>
     </div>
     <div class="faq-item">
-      <button class="faq-q">Est-ce que les poils tombent ?<span class="faq-icon">+</span></button>
+      <button class="faq-q">Est-ce que cela peut faire tomber les poils ?<span class="faq-icon">+</span></button>
       <p class="faq-a">Non. Le maquillage permanent n'empêche pas les poils naturels de pousser normalement.</p>
     </div>
     <div class="faq-item">
@@ -1117,14 +1135,11 @@
         <span>Microblading</span>
         <em>Résultat final</em>
       </div>
-      <div class="aa-split">
-        <div class="aa-before">
-          <!-- <img src="images/mb-avant-1.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"> -->
-          <span class="aa-tag">Avant</span>
-        </div>
-        <div class="aa-after">
-          <!-- <img src="images/mb-apres-1.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"> -->
-          <span class="aa-tag">Après</span>
+      <div class="aa-photo-full">
+        <img src="images/avant-apres-1.jpg" alt="Avant / Après microblading" class="aa-real-img">
+        <div class="aa-photo-labels">
+          <span class="aa-tag aa-tag-before">Avant</span>
+          <span class="aa-tag aa-tag-after">Après</span>
         </div>
       </div>
       <div class="aa-divider"><span>✦</span></div>
@@ -1136,14 +1151,11 @@
         <span>Powder Brows</span>
         <em>Résultat final</em>
       </div>
-      <div class="aa-split">
-        <div class="aa-before">
-          <!-- <img src="images/pb-avant-1.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"> -->
-          <span class="aa-tag">Avant</span>
-        </div>
-        <div class="aa-after">
-          <!-- <img src="images/pb-apres-1.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"> -->
-          <span class="aa-tag">Après</span>
+      <div class="aa-photo-full">
+        <img src="images/avant-apres-2.jpg" alt="Avant / Après powder brows" class="aa-real-img">
+        <div class="aa-photo-labels">
+          <span class="aa-tag aa-tag-before">Avant</span>
+          <span class="aa-tag aa-tag-after">Après</span>
         </div>
       </div>
       <div class="aa-divider"><span>✦</span></div>
