@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brow Derma — Admin</title>
+<script src="../cms-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0c0c0c;
+  --surface:   #161616;
+  --card:      #1e1e1e;
+  --border:    rgba(255,255,255,.08);
+  --border-hv: rgba(255,255,255,.16);
+  --text:      #f0ece6;
+  --muted:     #6b6460;
+  --gold:      #B8955A;
+  --gold-lt:   #D4AF78;
+  --danger:    #f87171;
+  --success:   #4ade80;
+  --radius:    4px;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── UTILITIES ─────────────────────────────────────── */
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* ── LOGIN ─────────────────────────────────────────── */
+#login-screen {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem;
+}
+.login-card {
+  width: 100%; max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2.5rem;
+}
+.login-logo {
+  font-size: .7rem; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 2rem;
+}
+.login-logo strong { color: var(--gold); font-weight: 600; }
+.login-title {
+  font-size: 1.3rem; font-weight: 600; color: var(--text);
+  margin-bottom: .4rem;
+}
+.login-sub { font-size: .82rem; color: var(--muted); margin-bottom: 2rem; }
+
+.field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1.2rem; }
+.field label { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.field input {
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: .7rem .9rem; font-size: .88rem;
+  font-family: inherit; border-radius: var(--radius);
+  transition: border-color .2s; outline: none;
+}
+.field input:focus { border-color: var(--gold); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .7rem 1.4rem; font-size: .78rem; letter-spacing: .1em;
+  text-transform: uppercase; font-family: inherit; font-weight: 500;
+  cursor: pointer; border: none; border-radius: var(--radius);
+  transition: all .2s; white-space: nowrap;
+}
+.btn:active { transform: translateY(1px) scale(.99); }
+.btn-gold { background: var(--gold); color: #1a0e04; }
+.btn-gold:hover { background: var(--gold-lt); }
+.btn-outline {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+}
+.btn-outline:hover { border-color: var(--border-hv); color: var(--text); }
+.btn-danger { background: transparent; border: 1px solid rgba(248,113,113,.3); color: var(--danger); }
+.btn-danger:hover { background: rgba(248,113,113,.1); }
+.btn-sm { padding: .4rem .8rem; font-size: .7rem; }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: .45; pointer-events: none; }
+
+#login-error {
+  font-size: .78rem; color: var(--danger);
+  min-height: 1.2em; margin-bottom: 1rem;
+}
+.lockout-msg {
+  font-size: .78rem; color: var(--danger); text-align: center; margin-top: 1rem;
+}
+
+/* ── DASHBOARD ──────────────────────────────────────── */
+#dashboard-screen {
+  display: flex; flex-direction: column;
+  height: 100vh; overflow: hidden;
+}
+
+/* Top bar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem; height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0; gap: 1rem;
+}
+.topbar-brand {
+  font-size: .72rem; letter-spacing: .28em; text-transform: uppercase;
+  font-weight: 600; color: var(--gold); white-space: nowrap;
+}
+.topbar-actions { display: flex; align-items: center; gap: .8rem; }
+.dirty-badge {
+  font-size: .7rem; letter-spacing: .05em;
+  background: rgba(184,149,90,.15); color: var(--gold);
+  padding: .25rem .6rem; border-radius: 2rem;
+}
+.preview-link {
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+  transition: color .2s;
+}
+.preview-link:hover { color: var(--text); }
+
+/* Main layout */
+.dashboard-body {
+  display: flex; flex: 1; overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 0;
+  overflow-y: auto;
+}
+.sidebar-section-label {
+  font-size: .62rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted); padding: 0 1.2rem 0.6rem;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .6rem 1.2rem; cursor: pointer;
+  font-size: .82rem; color: var(--muted);
+  transition: background .15s, color .15s;
+  border-left: 2px solid transparent;
+}
+.sidebar-item:hover { background: rgba(255,255,255,.04); color: var(--text); }
+.sidebar-item.active {
+  border-left-color: var(--gold); color: var(--gold);
+  background: rgba(184,149,90,.07);
+}
+.sidebar-icon { width: 16px; text-align: center; font-style: normal; flex-shrink: 0; }
+
+/* Main content */
+.main {
+  flex: 1; overflow-y: auto;
+  padding: 2rem 2.5rem;
+}
+.section-head { margin-bottom: 2rem; }
+.section-head h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: .25rem; }
+.section-head p  { font-size: .82rem; color: var(--muted); }
+
+/* Fields */
+.fields-grid { display: flex; flex-direction: column; gap: 1.4rem; }
+.cms-field { display: flex; flex-direction: column; gap: .5rem; }
+.cms-label {
+  font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: .5rem;
+}
+.cms-label .type-badge {
+  font-size: .58rem; background: rgba(255,255,255,.06);
+  padding: .15rem .4rem; border-radius: 2px; text-transform: none; letter-spacing: 0;
+}
+.cms-input, .cms-textarea {
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: .65rem .85rem; font-size: .85rem;
+  font-family: inherit; border-radius: var(--radius);
+  transition: border-color .2s; outline: none; width: 100%;
+}
+.cms-input:focus, .cms-textarea:focus { border-color: var(--gold); }
+.cms-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.cms-textarea.html-field { font-family: 'Courier New', monospace; font-size: .8rem; min-height: 80px; }
+.field-hint {
+  font-size: .7rem; color: var(--muted);
+  display: flex; align-items: center; gap: .3rem;
+}
+.dirty-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold); flex-shrink: 0; display: none;
+}
+.cms-field.is-dirty .dirty-dot { display: inline-block; }
+
+/* Image field */
+.image-field { display: flex; flex-direction: column; gap: .8rem; }
+.image-preview {
+  width: 120px; height: 80px; border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+}
+.image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.image-preview .no-img { font-size: .7rem; color: var(--muted); }
+.image-actions { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.upload-progress {
+  font-size: .72rem; color: var(--gold); display: none;
+}
+
+/* FAQ editor */
+.faq-editor { display: flex; flex-direction: column; gap: 1rem; }
+.faq-pair {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+.faq-pair-num {
+  font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: .2rem;
+}
+.faq-pair-row { display: flex; gap: .5rem; align-items: flex-start; }
+.faq-pair-row .cms-input,
+.faq-pair-row .cms-textarea { flex: 1; }
+.faq-add { margin-top: .5rem; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+  padding: .75rem 1.2rem; border-radius: var(--radius);
+  font-size: .82rem; font-weight: 500;
+  transform: translateY(8px); opacity: 0;
+  transition: all .3s; pointer-events: none;
+  display: flex; align-items: center; gap: .6rem;
+}
+.toast.show { transform: none; opacity: 1; }
+.toast.success { background: #14532d; color: var(--success); border: 1px solid #166534; }
+.toast.error   { background: #450a0a; color: var(--danger);  border: 1px solid #7f1d1d; }
+
+/* Divider */
+.fields-divider {
+  border: none; border-top: 1px solid var(--border);
+  margin: .5rem 0;
+}
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.2);
+  border-top-color: currentColor; border-radius: 50%;
+  animation: spin .7s linear infinite; flex-shrink: 0;
+}
+
+/* Config warning */
+.config-warning {
+  background: #1c0e02; border: 1px solid rgba(184,149,90,.3);
+  padding: 1.5rem; text-align: center; margin: 2rem;
+  border-radius: var(--radius);
+}
+.config-warning h3 { color: var(--gold); margin-bottom: .5rem; font-size: .95rem; }
+.config-warning p  { font-size: .82rem; color: var(--muted); line-height: 1.7; }
+.config-warning code {
+  background: rgba(255,255,255,.06); padding: .1rem .4rem;
+  border-radius: 2px; font-size: .78rem; color: var(--text);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+@media (max-width: 640px) {
+  .sidebar { width: 180px; }
+  .main { padding: 1.5rem; }
+  .topbar { padding: 0 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ──────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <p class="login-logo"><strong>BROW</strong> ✦ <strong>DERMA</strong></p>
+    <h1 class="login-title">Administration</h1>
+    <p class="login-sub">Connectez-vous pour modifier le site.</p>
+    <div id="login-error" role="alert"></div>
+    <form id="login-form">
+      <div class="field">
+        <label for="l-email">Adresse email</label>
+        <input id="l-email" type="email" autocomplete="email" placeholder="admin@email.com" required>
+      </div>
+      <div class="field">
+        <label for="l-pass">Mot de passe</label>
+        <input id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-gold btn-full" id="login-btn">Se connecter</button>
+    </form>
+    <p class="lockout-msg hidden" id="lockout-msg"></p>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ───────────────────────────────────────── -->
+<div id="dashboard-screen" class="hidden">
+  <header class="topbar">
+    <span class="topbar-brand">BD Admin</span>
+    <div class="topbar-actions">
+      <span class="dirty-badge hidden" id="dirty-badge">0 modification(s)</span>
+      <a href="../index.html" target="_blank" class="preview-link">Voir le site ↗</a>
+      <button class="btn btn-gold btn-sm" id="publish-btn">Publier</button>
+      <button class="btn btn-outline btn-sm" id="logout-btn">Déconnexion</button>
+    </div>
+  </header>
+  <div class="dashboard-body">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main" id="main-content"></main>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+'use strict';
+
+// ── CONFIG CHECK ────────────────────────────────────────────
+var cfg = window.CMS_CONFIG;
+var cfgOk = cfg && cfg.url && cfg.url !== 'YOUR_SUPABASE_URL';
+
+// ── SECTIONS DEFINITION ─────────────────────────────────────
+var SECTIONS = [
+  { id:'seo', label:'SEO', icon:'◎', desc:'Titre, description et balises de partage réseaux sociaux.', fields:[
+    { key:'seo.title',          label:'Titre de page',             type:'text'     },
+    { key:'seo.description',    label:'Meta description',          type:'textarea' },
+    { key:'seo.og_title',       label:'OG Title (réseaux sociaux)',type:'text'     },
+    { key:'seo.og_description', label:'OG Description',            type:'textarea' },
+  ]},
+  { id:'hero', label:'Héro', icon:'⬛', desc:'Section d\'accueil visible en premier à l\'ouverture du site.', fields:[
+    { key:'hero.eyebrow',    label:'Accroche (texte doré)',  type:'text'     },
+    { key:'hero.title',      label:'Titre principal',        type:'html',     hint:'Balises supportées : &lt;br&gt; &lt;em&gt; &lt;strong&gt;' },
+    { key:'hero.subtitle',   label:'Sous-titre',             type:'textarea' },
+    { key:'hero.cta_primary',label:'Bouton principal',       type:'text'     },
+    { key:'hero.badge_label',label:'Badge — texte',          type:'text'     },
+    { key:'hero.badge_value',label:'Badge — valeur',         type:'text'     },
+    { key:'hero.image',      label:'Image héro',             type:'image'    },
+  ]},
+  { id:'intro', label:'Introduction', icon:'◈', desc:'Bande de texte après le héro avec le chiffre clé.', fields:[
+    { key:'intro.stat_number', label:'Chiffre',           type:'text' },
+    { key:'intro.stat_label',  label:'Label du chiffre',  type:'html', hint:'Balise &lt;br&gt; pour les sauts de ligne' },
+    { key:'intro.quote',       label:'Phrase d\'accroche', type:'html', hint:'&lt;em&gt; pour surligner en doré' },
+  ]},
+  { id:'prestations', label:'Prestations', icon:'✦', desc:'Les trois cartes de services (Microblading, Powder Brows, Combo Brow).', fields:[
+    { key:'presta.1.tag',     label:'Carte 1 — Catégorie',   type:'text'     },
+    { key:'presta.1.name',    label:'Carte 1 — Nom',         type:'text'     },
+    { key:'presta.1.subtitle',label:'Carte 1 — Sous-titre',  type:'text'     },
+    { key:'presta.1.desc',    label:'Carte 1 — Description', type:'textarea' },
+    null, // divider
+    { key:'presta.2.tag',     label:'Carte 2 — Catégorie',   type:'text'     },
+    { key:'presta.2.name',    label:'Carte 2 — Nom',         type:'text'     },
+    { key:'presta.2.subtitle',label:'Carte 2 — Sous-titre',  type:'text'     },
+    { key:'presta.2.desc',    label:'Carte 2 — Description', type:'textarea' },
+    null,
+    { key:'presta.3.tag',     label:'Carte 3 — Catégorie',   type:'text'     },
+    { key:'presta.3.name',    label:'Carte 3 — Nom',         type:'text'     },
+    { key:'presta.3.subtitle',label:'Carte 3 — Sous-titre',  type:'text'     },
+    { key:'presta.3.desc',    label:'Carte 3 — Description', type:'textarea' },
+  ]},
+  { id:'tarifs', label:'Tarifs', icon:'€', desc:'Prix des prestations et des retouches.', fields:[
+    { key:'tarif.microblading.price',    label:'Microblading — prix (€)',       type:'text' },
+    { key:'tarif.powder.price',          label:'Powder Brows — prix (€)',       type:'text' },
+    { key:'tarif.combo.price',           label:'Combo Brows — prix (€)',        type:'text' },
+    null,
+    { key:'tarif.retouche.micro.6m',     label:'Retouche Micro < 6 mois',      type:'text' },
+    { key:'tarif.retouche.micro.12m',    label:'Retouche Micro 6–12 mois',     type:'text' },
+    { key:'tarif.retouche.micro.18m',    label:'Retouche Micro 12–18 mois',    type:'text' },
+    { key:'tarif.retouche.micro.18plus', label:'Retouche Micro > 18 mois',     type:'text' },
+    null,
+    { key:'tarif.retouche.powder.12m',   label:'Retouche Powder < 12 mois',    type:'text' },
+    { key:'tarif.retouche.powder.18m',   label:'Retouche Powder 12–18 mois',   type:'text' },
+    { key:'tarif.retouche.powder.24m',   label:'Retouche Powder 18–24 mois',   type:'text' },
+    null,
+    { key:'tarif.retouche.combo.12m',    label:'Retouche Combo < 12 mois',     type:'text' },
+    { key:'tarif.retouche.combo.18m',    label:'Retouche Combo 12–18 mois',    type:'text' },
+    { key:'tarif.retouche.combo.24m',    label:'Retouche Combo 18–24 mois',    type:'text' },
+  ]},
+  { id:'apropos', label:'À propos', icon:'◉', desc:'Section présentation du studio et des valeurs.', fields:[
+    { key:'apropos.text1', label:'Paragraphe 1', type:'html',     hint:'&lt;strong&gt; pour le gras' },
+    { key:'apropos.text2', label:'Paragraphe 2', type:'textarea' },
+  ]},
+  { id:'faq', label:'FAQ', icon:'?', desc:'Questions fréquentes — ajoutez, modifiez ou supprimez des questions.', fields:[
+    { key:'faq.items', label:'Questions / Réponses', type:'faq' },
+  ]},
+  { id:'contact', label:'Contact', icon:'✉', desc:'Coordonnées affichées sur le site.', fields:[
+    { key:'contact.address',   label:'Adresse',           type:'text' },
+    { key:'contact.phone',     label:'Téléphone',         type:'text' },
+    { key:'contact.email',     label:'Email',             type:'text' },
+    { key:'contact.instagram', label:'Instagram (@handle)', type:'text' },
+  ]},
+];
+
+// ── STATE ────────────────────────────────────────────────────
+var sb    = null;
+var state = { content:{}, dirty:{}, section:'seo', saving:false };
+
+// ── BRUTE FORCE PROTECTION ───────────────────────────────────
+var BF_KEY = 'bd_admin_bf';
+function bfGet()  { try { return JSON.parse(localStorage.getItem(BF_KEY)) || {attempts:0,until:0}; } catch(e){ return {attempts:0,until:0}; } }
+function bfSet(o) { localStorage.setItem(BF_KEY, JSON.stringify(o)); }
+function bfCheck() {
+  var d = bfGet(); var now = Date.now();
+  if (d.until && now < d.until) {
+    var mins = Math.ceil((d.until - now) / 60000);
+    return 'Compte bloqué. Réessayez dans ' + mins + ' minute(s).';
+  }
+  return null;
+}
+function bfFail() {
+  var d = bfGet(); d.attempts = (d.attempts||0) + 1;
+  if (d.attempts >= 5) { d.until = Date.now() + 15*60*1000; d.attempts = 0; }
+  bfSet(d);
+}
+function bfReset() { bfSet({attempts:0,until:0}); }
+
+// ── TOAST ────────────────────────────────────────────────────
+var toastTimer = null;
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast ' + (type||'success');
+  clearTimeout(toastTimer);
+  requestAnimationFrame(function(){ el.classList.add('show'); });
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3500);
+}
+
+// ── SUPABASE INIT ────────────────────────────────────────────
+function initSB() {
+  if (!cfgOk) return;
+  sb = supabase.createClient(cfg.url, cfg.key);
+}
+
+// ── AUTH ─────────────────────────────────────────────────────
+function showLogin() {
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('dashboard-screen').classList.add('hidden');
+}
+function showDashboard() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('dashboard-screen').classList.remove('hidden');
+  loadContent();
+}
+
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!cfgOk) { showConfigWarning(); return; }
+  var errEl  = document.getElementById('login-error');
+  var lockEl = document.getElementById('lockout-msg');
+  var btn    = document.getElementById('login-btn');
+
+  var locked = bfCheck();
+  if (locked) { lockEl.textContent = locked; lockEl.classList.remove('hidden'); return; }
+
+  var email = document.getElementById('l-email').value.trim();
+  var pass  = document.getElementById('l-pass').value;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Connexion…';
+  errEl.textContent = '';
+
+  try {
+    var res = await sb.auth.signInWithPassword({ email: email, password: pass });
+    if (res.error) {
+      bfFail();
+      var lk = bfCheck();
+      if (lk) { lockEl.textContent = lk; lockEl.classList.remove('hidden'); }
+      errEl.textContent = 'Email ou mot de passe incorrect.';
+    } else {
+      bfReset();
+      showDashboard();
+    }
+  } catch(err) {
+    errEl.textContent = 'Erreur de connexion. Vérifiez votre configuration Supabase.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', async function() {
+  if (sb) await sb.auth.signOut();
+  state.dirty = {};
+  showLogin();
+});
+
+// ── LOAD CONTENT ─────────────────────────────────────────────
+async function loadContent() {
+  if (!sb) return;
+  var res = await sb.from('content').select('*');
+  if (res.error) { toast('Erreur de chargement : ' + res.error.message, 'error'); return; }
+  state.content = {};
+  (res.data || []).forEach(function(row) {
+    state.content[row.key] = row;
+  });
+  renderSidebar();
+  renderSection(state.section);
+}
+
+// ── PUBLISH ──────────────────────────────────────────────────
+document.getElementById('publish-btn').addEventListener('click', async function() {
+  var keys = Object.keys(state.dirty);
+  if (!keys.length) { toast('Aucune modification à publier.', 'success'); return; }
+  if (!sb) return;
+
+  var btn = document.getElementById('publish-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  var rows = keys.map(function(k) {
+    var orig = state.content[k] || {};
+    return { key:k, value:state.dirty[k], type:orig.type||'text', section:orig.section||'', label:orig.label||k };
+  });
+
+  var res = await sb.from('content').upsert(rows, { onConflict:'key' });
+  if (res.error) {
+    toast('Erreur : ' + res.error.message, 'error');
+  } else {
+    rows.forEach(function(r) {
+      if (!state.content[r.key]) state.content[r.key] = r;
+      state.content[r.key].value = r.value;
+    });
+    state.dirty = {};
+    updateDirtyBadge();
+    renderSection(state.section);
+    toast('✓ ' + rows.length + ' modification(s) publiée(s).', 'success');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Publier';
+});
+
+// ── DIRTY TRACKING ───────────────────────────────────────────
+function markDirty(key, value) {
+  state.dirty[key] = value;
+  updateDirtyBadge();
+}
+function updateDirtyBadge() {
+  var n = Object.keys(state.dirty).length;
+  var badge = document.getElementById('dirty-badge');
+  if (n > 0) {
+    badge.textContent = n + ' modification(s) non publiée(s)';
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+  document.getElementById('publish-btn').disabled = (n === 0);
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────
+function renderSidebar() {
+  var sb_ = document.getElementById('sidebar');
+  sb_.innerHTML = '<p class="sidebar-section-label">Sections</p>';
+  SECTIONS.forEach(function(sec) {
+    var item = document.createElement('div');
+    item.className = 'sidebar-item' + (sec.id === state.section ? ' active' : '');
+    item.innerHTML = '<i class="sidebar-icon">' + sec.icon + '</i>' + sec.label;
+    item.addEventListener('click', function() {
+      state.section = sec.id;
+      renderSidebar();
+      renderSection(sec.id);
+    });
+    sb_.appendChild(item);
+  });
+}
+
+// ── SECTION RENDERER ─────────────────────────────────────────
+function renderSection(sectionId) {
+  var sec = SECTIONS.find(function(s){ return s.id === sectionId; });
+  var main = document.getElementById('main-content');
+  if (!sec) return;
+
+  var html = '<div class="section-head">'
+    + '<h2>' + sec.icon + ' ' + sec.label + '</h2>'
+    + '<p>' + sec.desc + '</p>'
+    + '</div><div class="fields-grid">';
+
+  sec.fields.forEach(function(f) {
+    if (!f) { html += '<hr class="fields-divider">'; return; }
+    var val = state.dirty.hasOwnProperty(f.key)
+      ? state.dirty[f.key]
+      : (state.content[f.key] ? state.content[f.key].value : '');
+    var isDirty = state.dirty.hasOwnProperty(f.key);
+
+    html += '<div class="cms-field' + (isDirty ? ' is-dirty' : '') + '" data-key="' + esc(f.key) + '">';
+    html += '<label class="cms-label"><span class="dirty-dot"></span>' + esc(f.label)
+      + ' <span class="type-badge">' + f.type + '</span></label>';
+
+    if (f.type === 'text') {
+      html += '<input class="cms-input" type="text" value="' + esc(val) + '" data-key="' + esc(f.key) + '">';
+    } else if (f.type === 'textarea' || f.type === 'html') {
+      html += '<textarea class="cms-textarea' + (f.type === 'html' ? ' html-field' : '') + '" data-key="' + esc(f.key) + '">' + esc(val) + '</textarea>';
+    } else if (f.type === 'image') {
+      html += renderImageField(f.key, val);
+    } else if (f.type === 'faq') {
+      html += renderFaqEditor(val);
+    }
+
+    if (f.hint) html += '<p class="field-hint">' + f.hint + '</p>';
+    html += '</div>';
+  });
+
+  html += '</div>';
+  main.innerHTML = html;
+
+  // Attach change listeners
+  main.querySelectorAll('.cms-input, .cms-textarea').forEach(function(el) {
+    el.addEventListener('input', function() {
+      var key = el.getAttribute('data-key');
+      markDirty(key, el.value);
+      var fieldEl = main.querySelector('.cms-field[data-key="' + key + '"]');
+      if (fieldEl) fieldEl.classList.add('is-dirty');
+    });
+  });
+
+  // Image upload button
+  main.querySelectorAll('.img-upload-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key = btn.getAttribute('data-key');
+      var inp = main.querySelector('.img-file-input[data-key="' + key + '"]');
+      if (inp) inp.click();
+    });
+  });
+  main.querySelectorAll('.img-file-input').forEach(function(inp) {
+    inp.addEventListener('change', function() {
+      if (inp.files && inp.files[0]) handleImageUpload(inp.getAttribute('data-key'), inp.files[0]);
+    });
+  });
+  main.querySelectorAll('.img-url-input').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var key = inp.getAttribute('data-key');
+      markDirty(key, inp.value);
+      var prev = main.querySelector('.img-preview-el[data-key="' + key + '"]');
+      if (prev && inp.value) { prev.src = inp.value; prev.style.display = 'block'; }
+    });
+  });
+
+  // FAQ editor
+  if (sec.id === 'faq') attachFaqListeners();
+}
+
+function renderImageField(key, val) {
+  var hasImg = val && val.trim();
+  return '<div class="image-field">'
+    + '<div class="image-preview">'
+    + (hasImg
+      ? '<img src="' + esc(val) + '" alt="" class="img-preview-el" data-key="' + esc(key) + '">'
+      : '<span class="no-img">Aucune image</span>')
+    + '</div>'
+    + '<div class="image-actions">'
+    + '<button class="btn btn-outline btn-sm img-upload-btn" data-key="' + esc(key) + '">↑ Uploader</button>'
+    + '<input type="file" accept="image/*" class="img-file-input sr-only" data-key="' + esc(key) + '">'
+    + '<span class="upload-progress" id="up-' + key.replace(/\./g,'-') + '">Envoi…</span>'
+    + '</div>'
+    + '<input type="text" class="cms-input img-url-input" placeholder="ou coller une URL directe…" value="' + esc(val) + '" data-key="' + esc(key) + '">'
+    + '</div>';
+}
+
+async function handleImageUpload(key, file) {
+  if (!sb) return;
+  var progId = 'up-' + key.replace(/\./g,'-');
+  var prog = document.getElementById(progId);
+  if (prog) prog.style.display = 'inline';
+
+  var ext = file.name.split('.').pop();
+  var name = Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + ext;
+
+  var res = await sb.storage.from('media').upload(name, file, { upsert: true });
+  if (res.error) {
+    toast('Erreur upload : ' + res.error.message, 'error');
+  } else {
+    var pub = sb.storage.from('media').getPublicUrl(name);
+    var url = pub.data.publicUrl;
+    markDirty(key, url);
+    // Update preview
+    var prev = document.querySelector('.img-preview-el[data-key="' + key + '"]');
+    var urlInp = document.querySelector('.img-url-input[data-key="' + key + '"]');
+    if (prev) { prev.src = url; prev.style.display = 'block'; }
+    if (urlInp) urlInp.value = url;
+    toast('Image uploadée.', 'success');
+  }
+  if (prog) prog.style.display = 'none';
+}
+
+// ── FAQ EDITOR ────────────────────────────────────────────────
+function renderFaqEditor(jsonVal) {
+  var items = [];
+  try { items = JSON.parse(jsonVal || '[]'); } catch(e) {}
+  if (!Array.isArray(items)) items = [];
+
+  var html = '<div class="faq-editor" id="faq-editor">';
+  items.forEach(function(item, i) {
+    html += renderFaqPair(item, i);
+  });
+  html += '<button class="btn btn-outline btn-sm faq-add" id="faq-add-btn">+ Ajouter une question</button>';
+  html += '</div>';
+  return html;
+}
+
+function renderFaqPair(item, i) {
+  return '<div class="faq-pair" data-faq-idx="' + i + '">'
+    + '<p class="faq-pair-num">Question ' + (i+1) + '</p>'
+    + '<div class="faq-pair-row">'
+    + '<input class="cms-input faq-q-input" type="text" placeholder="Question…" value="' + esc(item.q||'') + '">'
+    + '<button class="btn btn-danger btn-sm faq-del-btn" data-idx="' + i + '">Supprimer</button>'
+    + '</div>'
+    + '<textarea class="cms-textarea faq-a-input" placeholder="Réponse…">' + esc(item.a||'') + '</textarea>'
+    + '</div>';
+}
+
+function getFaqItems() {
+  var pairs = document.querySelectorAll('.faq-pair');
+  var items = [];
+  pairs.forEach(function(pair) {
+    var q = pair.querySelector('.faq-q-input');
+    var a = pair.querySelector('.faq-a-input');
+    if (q && a) items.push({ q: q.value, a: a.value });
+  });
+  return items;
+}
+
+function attachFaqListeners() {
+  var editor = document.getElementById('faq-editor');
+  if (!editor) return;
+
+  function onChange() {
+    markDirty('faq.items', JSON.stringify(getFaqItems()));
+    var fieldEl = document.querySelector('.cms-field[data-key="faq.items"]');
+    if (fieldEl) fieldEl.classList.add('is-dirty');
+  }
+
+  editor.querySelectorAll('.faq-q-input, .faq-a-input').forEach(function(el) {
+    el.addEventListener('input', onChange);
+  });
+
+  editor.querySelectorAll('.faq-del-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(btn.getAttribute('data-idx'));
+      var items = getFaqItems();
+      items.splice(idx, 1);
+      markDirty('faq.items', JSON.stringify(items));
+      // Re-render editor
+      var edEl = document.getElementById('faq-editor');
+      if (edEl) {
+        var html = items.map(function(it,i){ return renderFaqPair(it,i); }).join('');
+        html += '<button class="btn btn-outline btn-sm faq-add" id="faq-add-btn">+ Ajouter une question</button>';
+        edEl.innerHTML = html;
+        attachFaqListeners();
+      }
+    });
+  });
+
+  var addBtn = document.getElementById('faq-add-btn');
+  if (addBtn) {
+    addBtn.addEventListener('click', function() {
+      var items = getFaqItems();
+      items.push({ q:'', a:'' });
+      markDirty('faq.items', JSON.stringify(items));
+      var edEl = document.getElementById('faq-editor');
+      if (edEl) {
+        var html = items.map(function(it,i){ return renderFaqPair(it,i); }).join('');
+        html += '<button class="btn btn-outline btn-sm faq-add" id="faq-add-btn">+ Ajouter une question</button>';
+        edEl.innerHTML = html;
+        attachFaqListeners();
+        // Focus last Q input
+        var qs = edEl.querySelectorAll('.faq-q-input');
+        if (qs.length) qs[qs.length-1].focus();
+      }
+    });
+  }
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showConfigWarning() {
+  document.getElementById('login-screen').innerHTML =
+    '<div class="config-warning">'
+    + '<h3>Configuration manquante</h3>'
+    + '<p>Ouvrez <code>cms-config.js</code> et renseignez votre<br>'
+    + '<code>url</code> et <code>key</code> Supabase avant de vous connecter.</p>'
+    + '</div>';
+}
+
+// ── BOOT ──────────────────────────────────────────────────────
+if (!cfgOk) {
+  document.getElementById('login-btn').addEventListener('click', function(e) {
+    e.preventDefault(); showConfigWarning();
+  });
+} else {
+  initSB();
+  sb.auth.getSession().then(function(res) {
+    if (res.data && res.data.session) showDashboard();
+  });
+  sb.auth.onAuthStateChange(function(event) {
+    if (event === 'SIGNED_OUT') showLogin();
+  });
+}
+
+updateDirtyBadge();
+})();
+</script>
+</body>
+</html>

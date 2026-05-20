@@ -11,6 +11,7 @@
 <link rel="icon" href="images/logo.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="cms-config.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -485,6 +486,12 @@
     font-size: .62rem; letter-spacing: .12em; color: rgba(253,250,246,.25);
     text-align: center;
   }
+  .footer-admin-link {
+    font-size: .55rem; color: rgba(253,250,246,.06);
+    text-decoration: none; transition: color .3s;
+    letter-spacing: .1em;
+  }
+  .footer-admin-link:hover { color: rgba(253,250,246,.25); }
 
   /* ─── ANIMATIONS ─── */
   .reveal {
@@ -836,19 +843,19 @@
 <!-- ─── HERO ─── -->
 <section class="hero" id="accueil">
   <div class="hero-left">
-    <span class="hero-eyebrow">Maquillage permanent sourcils</span>
-    <h1 class="hero-title">
+    <span class="hero-eyebrow" data-cms-key="hero.eyebrow">Maquillage permanent sourcils</span>
+    <h1 class="hero-title" data-cms-key="hero.title">
       Des sourcils<br>
       naturels qui<br>
       <em>subliment</em><br>
       votre regard
     </h1>
-    <p class="hero-subtitle">
+    <p class="hero-subtitle" data-cms-key="hero.subtitle">
       Microblading &amp; sourcils poudrés pour restructurer, équilibrer
       et intensifier le regard avec élégance.
     </p>
     <div class="hero-actions">
-      <a href="#contact" class="btn-primary">Prendre rendez-vous</a>
+      <a href="#contact" class="btn-primary" data-cms-key="hero.cta_primary">Prendre rendez-vous</a>
       <a href="#prestations" class="btn-ghost">
         Découvrir
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -856,7 +863,7 @@
     </div>
   </div>
   <div class="hero-right">
-    <img src="images/avant-apres-4.jpg" alt="Résultat Brow Derma — avant et après microblading" class="hero-photo"
+    <img src="images/avant-apres-4.jpg" alt="Résultat Brow Derma — avant et après microblading" class="hero-photo" data-cms-key="hero.image"
          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
     <div class="hero-img-placeholder" style="display:none">
       <svg class="hero-deco" viewBox="0 0 300 80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -865,8 +872,8 @@
       </svg>
     </div>
     <div class="hero-badge">
-      <p>Tenue jusqu'à</p>
-      <strong>24 mois</strong>
+      <p data-cms-key="hero.badge_label">Tenue jusqu'à</p>
+      <strong data-cms-key="hero.badge_value">24 mois</strong>
     </div>
   </div>
   <div class="hero-scroll">
@@ -878,11 +885,11 @@
 <!-- ─── INTRO STRIP ─── -->
 <div class="intro-strip">
   <div class="intro-meta reveal">
-    <strong>3</strong>
-    <span>techniques<br>disponibles</span>
+    <strong data-cms-key="intro.stat_number">3</strong>
+    <span data-cms-key="intro.stat_label">techniques<br>disponibles</span>
   </div>
   <div class="intro-divider"></div>
-  <p class="reveal" style="transition-delay:.1s">
+  <p class="reveal" style="transition-delay:.1s" data-cms-key="intro.quote">
     Chez Brow Derma, chaque sourcil est étudié en fonction de
     <em>votre visage, votre peau</em> et votre expression naturelle.
     L'objectif : apporter équilibre, définition et harmonie — sans jamais transformer.
@@ -900,10 +907,10 @@
   <div class="presta-grid">
     <div class="presta-card reveal">
       <span class="presta-num">01</span>
-      <span class="presta-tag">Technique manuelle</span>
-      <h3 class="presta-name">Microblading</h3>
-      <p class="presta-subtitle">Des sourcils naturellement redessinés, poil à poil</p>
-      <p class="presta-desc">
+      <span class="presta-tag" data-cms-key="presta.1.tag">Technique manuelle</span>
+      <h3 class="presta-name" data-cms-key="presta.1.name">Microblading</h3>
+      <p class="presta-subtitle" data-cms-key="presta.1.subtitle">Des sourcils naturellement redessinés, poil à poil</p>
+      <p class="presta-desc" data-cms-key="presta.1.desc">
         Technique de tatouage manuel d'origine asiatique. Recréer un effet poil à poil très naturel pour restructurer les sourcils avec un rendu discret et précis. Idéal pour combler les zones clairsemées ou redonner de la symétrie au regard.
       </p>
       <div class="presta-specs">
@@ -916,10 +923,10 @@
 
     <div class="presta-card reveal" style="transition-delay:.12s">
       <span class="presta-num">02</span>
-      <span class="presta-tag">Powder Brows</span>
-      <h3 class="presta-name">Sourcils Poudrés</h3>
-      <p class="presta-subtitle">Un rendu doux et sophistiqué au quotidien</p>
-      <p class="presta-desc">
+      <span class="presta-tag" data-cms-key="presta.2.tag">Powder Brows</span>
+      <h3 class="presta-name" data-cms-key="presta.2.name">Sourcils Poudrés</h3>
+      <p class="presta-subtitle" data-cms-key="presta.2.subtitle">Un rendu doux et sophistiqué au quotidien</p>
+      <p class="presta-desc" data-cms-key="presta.2.desc">
         Technique semi-permanente créant un effet poudré élégant. Idéale pour les peaux mixtes à grasses, les peaux matures ou celles qui souhaitent un effet légèrement maquillé — tout en restant naturel.
       </p>
       <div class="presta-specs">
@@ -932,10 +939,10 @@
 
     <div class="presta-card reveal" style="transition-delay:.24s">
       <span class="presta-num">03</span>
-      <span class="presta-tag">Technique mixte</span>
-      <h3 class="presta-name">Combo Brow</h3>
-      <p class="presta-subtitle">L'équilibre parfait entre naturel et définition</p>
-      <p class="presta-desc">
+      <span class="presta-tag" data-cms-key="presta.3.tag">Technique mixte</span>
+      <h3 class="presta-name" data-cms-key="presta.3.name">Combo Brow</h3>
+      <p class="presta-subtitle" data-cms-key="presta.3.subtitle">L'équilibre parfait entre naturel et définition</p>
+      <p class="presta-desc" data-cms-key="presta.3.desc">
         Associe la finesse du microblading à la technique du poudré — résultat naturel, structuré et plus intense. Entièrement personnalisé selon la morphologie du visage. Idéal pour les sourcils peu fournis.
       </p>
       <div class="presta-specs">
@@ -961,38 +968,38 @@
       <div class="tarif-block-title">Créations</div>
       <div class="tarif-row">
         <div class="tarif-label">Microblading<small>Retouche fixatrice incluse</small></div>
-        <div class="tarif-price">290 <sub>€</sub></div>
+        <div class="tarif-price" data-cms-key="tarif.microblading.price">290 <sub>€</sub></div>
       </div>
       <div class="tarif-row">
         <div class="tarif-label">Powder Brows<small>Retouche fixatrice incluse</small></div>
-        <div class="tarif-price">290 <sub>€</sub></div>
+        <div class="tarif-price" data-cms-key="tarif.powder.price">290 <sub>€</sub></div>
       </div>
       <div class="tarif-row">
         <div class="tarif-label">Combo Brows<small>Retouche fixatrice incluse</small></div>
-        <div class="tarif-price">310 <sub>€</sub></div>
+        <div class="tarif-price" data-cms-key="tarif.combo.price">310 <sub>€</sub></div>
       </div>
     </div>
 
     <div class="tarif-block reveal" style="transition-delay:.1s">
       <div class="tarif-block-title">Retouches Microblading</div>
-      <div class="tarif-row"><div class="tarif-label">Moins de 6 mois</div><div class="tarif-price">90 <sub>€</sub></div></div>
-      <div class="tarif-row"><div class="tarif-label">6 à 12 mois</div><div class="tarif-price">120 <sub>€</sub></div></div>
-      <div class="tarif-row"><div class="tarif-label">12 à 18 mois</div><div class="tarif-price">150 <sub>€</sub></div></div>
-      <div class="tarif-row"><div class="tarif-label">Plus de 18 mois</div><div class="tarif-price">180 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">Moins de 6 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.micro.6m">90 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">6 à 12 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.micro.12m">120 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">12 à 18 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.micro.18m">150 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">Plus de 18 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.micro.18plus">180 <sub>€</sub></div></div>
     </div>
 
     <div class="tarif-block reveal" style="transition-delay:.15s">
       <div class="tarif-block-title">Retouches Powder Brows</div>
-      <div class="tarif-row"><div class="tarif-label">Moins de 12 mois</div><div class="tarif-price">110 <sub>€</sub></div></div>
-      <div class="tarif-row"><div class="tarif-label">12 à 18 mois</div><div class="tarif-price">140 <sub>€</sub></div></div>
-      <div class="tarif-row"><div class="tarif-label">18 à 24 mois</div><div class="tarif-price">170 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">Moins de 12 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.powder.12m">110 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">12 à 18 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.powder.18m">140 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">18 à 24 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.powder.24m">170 <sub>€</sub></div></div>
     </div>
 
     <div class="tarif-block reveal" style="transition-delay:.2s">
       <div class="tarif-block-title">Retouches Combo Brows</div>
-      <div class="tarif-row"><div class="tarif-label">Moins de 12 mois</div><div class="tarif-price">120 <sub>€</sub></div></div>
-      <div class="tarif-row"><div class="tarif-label">12 à 18 mois</div><div class="tarif-price">150 <sub>€</sub></div></div>
-      <div class="tarif-row"><div class="tarif-label">18 à 24 mois</div><div class="tarif-price">180 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">Moins de 12 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.combo.12m">120 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">12 à 18 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.combo.18m">150 <sub>€</sub></div></div>
+      <div class="tarif-row"><div class="tarif-label">18 à 24 mois</div><div class="tarif-price" data-cms-key="tarif.retouche.combo.24m">180 <sub>€</sub></div></div>
     </div>
   </div>
 
@@ -1016,10 +1023,10 @@
         <h2 class="section-title reveal">Sublimer<br><em>sans transformer</em></h2>
         <span class="gold-rule" style="margin:1.5rem 0 0"></span>
       </div>
-      <p class="apropos-text reveal">
+      <p class="apropos-text reveal" data-cms-key="apropos.text1">
         Passionnée par l'esthétique du regard et le travail du détail, j'ai créé Brow Derma avec une approche simple : <strong>sublimer sans transformer.</strong>
       </p>
-      <p class="apropos-text reveal">
+      <p class="apropos-text reveal" data-cms-key="apropos.text2">
         Chaque visage est unique. C'est pourquoi je prends le temps d'étudier la morphologie, l'équilibre et l'expression naturelle avant chaque prestation. Mon objectif : des résultats élégants, harmonieux et adaptés à chaque femme.
       </p>
       <div class="apropos-values reveal">
@@ -1079,7 +1086,7 @@
     <h2 class="section-title"><em>FAQ</em></h2>
     <span class="gold-rule"></span>
   </div>
-  <div class="faq-grid">
+  <div class="faq-grid" data-cms-key="faq.items">
     <div class="faq-item">
       <button class="faq-q">Est-ce douloureux ?<span class="faq-icon">+</span></button>
       <p class="faq-a">La sensation reste très supportable pour la majorité des clientes.</p>
@@ -1345,25 +1352,25 @@
         Pour toute question ou demande de rendez-vous, n'hésitez pas à me contacter directement. Je vous répondrai dans les plus brefs délais.
       </p>
       <div class="contact-links">
-        <a href="https://maps.google.com/maps?q=3+Avenue+Ernest+Millet+83400+Hy%C3%A8res" target="_blank" rel="noopener" class="contact-link reveal">
+        <a href="https://maps.google.com/maps?q=3+Avenue+Ernest+Millet+83400+Hy%C3%A8res" target="_blank" rel="noopener" class="contact-link reveal" data-cms-key="contact.address">
           <div class="contact-link-icon">
             <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="var(--ivory)"/></svg>
           </div>
           Chez Bianco Esthétique — 3 av. Ernest Millet, 83400 Hyères
         </a>
-        <a href="mailto:browderma83@gmail.com" class="contact-link reveal" style="transition-delay:.05s">
+        <a href="mailto:browderma83@gmail.com" class="contact-link reveal" style="transition-delay:.05s" data-cms-key="contact.email">
           <div class="contact-link-icon">
             <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
           </div>
           browderma83@gmail.com
         </a>
-        <a href="tel:+33695937652" class="contact-link reveal" style="transition-delay:.1s">
+        <a href="tel:+33695937652" class="contact-link reveal" style="transition-delay:.1s" data-cms-key="contact.phone">
           <div class="contact-link-icon">
             <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.5c0-.6.4-1 1-1H8c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.8 1.7z"/></svg>
           </div>
           06.95.93.76.52
         </a>
-        <a href="https://instagram.com/brow_derma" class="contact-link reveal" style="transition-delay:.2s" target="_blank" rel="noopener">
+        <a href="https://instagram.com/brow_derma" class="contact-link reveal" style="transition-delay:.2s" target="_blank" rel="noopener" data-cms-key="contact.instagram">
           <div class="contact-link-icon">
             <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
           </div>
@@ -1425,6 +1432,7 @@
     <a href="cgv.html">CGV</a>
   </div>
   <p class="footer-copy">© 2025 Brow Derma — Tous droits réservés</p>
+  <a href="admin/" class="footer-admin-link" aria-label="Administration">·</a>
 </footer>
 
 <script>
@@ -1434,15 +1442,18 @@
   }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-  // FAQ accordion
-  document.querySelectorAll('.faq-q').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.parentElement;
-      const wasOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-      if (!wasOpen) item.classList.add('open');
+  // FAQ accordion (named so cms.js can call it after rebuild)
+  window.initFaqAccordion = function() {
+    document.querySelectorAll('.faq-q').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.parentElement;
+        const wasOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        if (!wasOpen) item.classList.add('open');
+      });
     });
-  });
+  };
+  window.initFaqAccordion();
 
   // Burger menu
   const burger = document.getElementById('burger');
@@ -1524,5 +1535,6 @@
     });
   }
 </script>
+<script src="cms.js" defer></script>
 </body>
 </html>
