@@ -86,9 +86,10 @@
     if (!els.length) return;
     var isTarif   = /^tarif\./.test(key);
     var isContact = /^contact\./.test(key);
+    var isSiteLogo = key === 'site.logo';
 
     els.forEach(function (el) {
-      if (type === 'image') {
+      if (type === 'image' || isSiteLogo) {
         if (el.tagName === 'IMG') el.src = value;
         else el.style.backgroundImage = 'url(' + value + ')';
       } else if (type === 'html') {

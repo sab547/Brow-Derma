@@ -728,6 +728,23 @@
   .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--ivory); }
 
   /* ─── MOBILE OVERLAY ─── */
+  /* Logo overlay + footer */
+  .nav-overlay-logo {
+    position: absolute; top: 1.2rem; right: 4.5rem;
+    display: flex; align-items: center;
+  }
+  .nav-overlay-logo-img {
+    height: 52px; width: auto; object-fit: contain;
+    filter: brightness(0) invert(1); opacity: .9;
+  }
+  .footer-logo { display: flex; align-items: center; gap: .8rem; }
+  .footer-logo-img {
+    height: 36px; width: auto; object-fit: contain;
+    filter: brightness(0) invert(1); opacity: .7;
+  }
+  .footer-logo-text { font-size: .62rem; letter-spacing: .22em; color: rgba(253,250,246,.35); }
+  .footer-logo-text span { color: var(--gold); }
+
   .nav-overlay {
     position: fixed; inset: 0; z-index: 200;
     background: var(--ink);
@@ -804,7 +821,7 @@
 <!-- ─── NAV ─── -->
 <nav>
   <a href="#accueil" class="nav-logo">
-    <img src="images/logo.png" alt="" class="nav-logo-img" onerror="this.style.display='none'">
+    <img src="images/logo.png" alt="Brow Derma" class="nav-logo-img" data-cms-key="site.logo" onerror="this.style.display='none'">
     BROW <span>✦</span> DERMA
   </a>
   <ul class="nav-links">
@@ -822,6 +839,9 @@
 
 <!-- ─── MENU OVERLAY MOBILE ─── -->
 <div class="nav-overlay" id="navOverlay" aria-hidden="true">
+  <div class="nav-overlay-logo">
+    <img src="images/logo.png" alt="Brow Derma" class="nav-overlay-logo-img" data-cms-key="site.logo" onerror="this.style.display='none'">
+  </div>
   <div class="nav-overlay-links">
     <a href="#prestations" data-close><em>Prestations</em><span class="nav-num">01</span></a>
     <a href="#tarifs" data-close><em>Tarifs</em><span class="nav-num">02</span></a>
@@ -1417,7 +1437,10 @@
 <!-- ─── FOOTER ─── -->
 <footer>
   <div class="footer-top">
-    <div class="footer-logo">BROW <span>✦</span> DERMA</div>
+    <div class="footer-logo">
+      <img src="images/logo.png" alt="Brow Derma" class="footer-logo-img" data-cms-key="site.logo" onerror="this.style.display='none'">
+      <span class="footer-logo-text">BROW <span>✦</span> DERMA</span>
+    </div>
     <div class="footer-links">
       <a href="mailto:browderma83@gmail.com">Email</a>
       <a href="https://instagram.com/brow_derma" target="_blank" rel="noopener">Instagram</a>
