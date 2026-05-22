@@ -666,14 +666,19 @@ function navigate(viewId){
 // ── LOAD ALL ─────────────────────────────────────────────────────
 async function loadAll(){
   if(!sb)return;
-  var [cr,sr,pr]=await Promise.all([
-    sb.from('content').select('*'),
-    sb.from('page_sections').select('*').eq('page','home').order('position'),
-    sb.from('pages').select('*').order('created_at'),
-  ]);
-  if(!cr.error)cr.data.forEach(function(r){S.content[r.key]=r;});
-  if(!sr.error)S.sections=sr.data||[];
-  if(!pr.error)S.pages=pr.data||[];
+  try{
+    var cr=await sb.from('content').select('*');
+    if(cr.error) toast('Erreur contenu : '+cr.error.message,'error');
+    else (cr.data||[]).forEach(function(r){S.content[r.key]=r;});
+
+    var sr=await sb.from('page_sections').select('*').eq('page','home').order('position');
+    if(sr.error) toast('Sections : '+sr.error.message,'error');
+    else S.sections=sr.data||[];
+
+    var pr=await sb.from('pages').select('*').order('created_at');
+    if(pr.error) toast('Pages : '+pr.error.message,'error');
+    else S.pages=pr.data||[];
+  }catch(e){toast('Erreur : '+(e.message||e),'error');}
   buildNav();
   renderPanel();
   updateDirtyBadge();
