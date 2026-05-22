@@ -116,3 +116,65 @@ INSERT INTO content (key, value, type, section, label) VALUES
 ('contact.instagram', '@brow_derma',                          'text', 'contact', 'Instagram')
 
 ON CONFLICT (key) DO NOTHING;
+
+-- ─── PAGE BUILDER TABLES ─────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS pages (
+  id          UUID    DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug        TEXT    UNIQUE NOT NULL,
+  title       TEXT    NOT NULL,
+  meta_title  TEXT,
+  meta_description TEXT,
+  published   BOOLEAN DEFAULT false,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE pages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read pages"  ON pages FOR SELECT TO anon        USING (true);
+CREATE POLICY "Auth write pages"   ON pages FOR ALL    TO authenticated USING (true) WITH CHECK (true);
+
+INSERT INTO pages (slug, title, published) VALUES ('home', 'Accueil', true)
+ON CONFLICT (slug) DO NOTHING;
+
+-- Sections visibility + order per page
+CREATE TABLE IF NOT EXISTS page_sections (
+  id         UUID    DEFAULT gen_random_uuid() PRIMARY KEY,
+  page       TEXT    NOT NULL DEFAULT 'home',
+  section_id TEXT    NOT NULL,
+  label      TEXT    NOT NULL,
+  icon       TEXT    DEFAULT '◈',
+  position   INTEGER NOT NULL,
+  visible    BOOLEAN NOT NULL DEFAULT true,
+  UNIQUE(page, section_id)
+);
+
+ALTER TABLE page_sections ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read sections" ON page_sections FOR SELECT TO anon        USING (true);
+CREATE POLICY "Auth write sections"  ON page_sections FOR ALL    TO authenticated USING (true) WITH CHECK (true);
+
+INSERT INTO page_sections (page, section_id, label, icon, position, visible) VALUES
+  ('home', 'hero',          'Héro',               '⬛', 1,  true),
+  ('home', 'intro',         'Introduction',        '◈',  2,  true),
+  ('home', 'prestations',   'Prestations',         '✦',  3,  true),
+  ('home', 'tarifs',        'Tarifs',              '€',  4,  true),
+  ('home', 'apropos',       'À propos',            '◉',  5,  true),
+  ('home', 'cicatrisation', 'Cicatrisation',       '⊕',  6,  true),
+  ('home', 'faq',           'FAQ',                 '?',  7,  true),
+  ('home', 'contre',        'Contre-indications',  '⊘',  8,  true),
+  ('home', 'realisations',  'Réalisations',        '◫',  9,  true),
+  ('home', 'rdv',           'Bandeau RDV',         '→',  10, true),
+  ('home', 'localisation',  'Localisation',        '◎',  11, true),
+  ('home', 'contact',       'Contact',             '✉',  12, true)
+ON CONFLICT (page, section_id) DO NOTHING;
+
+-- Design color variables
+INSERT INTO content (key, value, type, section, label) VALUES
+  ('design.color.ivory',   '#F2EAE0', 'text', 'design', 'Couleur ivoire'),
+  ('design.color.gold',    '#B8955A', 'text', 'design', 'Couleur or (accent)'),
+  ('design.color.gold-lt', '#D4AF78', 'text', 'design', 'Couleur or clair'),
+  ('design.color.ink',     '#3D2612', 'text', 'design', 'Couleur encre (texte)'),
+  ('design.color.white',   '#F8F2E9', 'text', 'design', 'Fond clair'),
+  ('design.color.cream',   '#E8DDD0', 'text', 'design', 'Crème'),
+  ('design.color.blush',   '#D9C4B0', 'text', 'design', 'Blush')
+ON CONFLICT (key) DO NOTHING;

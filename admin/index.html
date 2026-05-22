@@ -8,811 +8,1285 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg:        #0c0c0c;
-  --surface:   #161616;
-  --card:      #1e1e1e;
-  --border:    rgba(255,255,255,.08);
-  --border-hv: rgba(255,255,255,.16);
-  --text:      #f0ece6;
-  --muted:     #6b6460;
-  --gold:      #B8955A;
-  --gold-lt:   #D4AF78;
-  --danger:    #f87171;
-  --success:   #4ade80;
-  --radius:    4px;
+  --bg:       #0a0a0a;
+  --s1:       #111;
+  --s2:       #1a1a1a;
+  --s3:       #222;
+  --border:   rgba(255,255,255,.07);
+  --borderact:rgba(255,255,255,.15);
+  --text:     #ede8e2;
+  --muted:    #666;
+  --gold:     #B8955A;
+  --gold-lt:  #D4AF78;
+  --danger:   #f87171;
+  --success:  #4ade80;
+  --info:     #60a5fa;
+  --r:        3px;
+  --nav-w:    56px;
+  --nav-exp:  220px;
 }
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;display:flex;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+.hidden{display:none!important;}
 
-html, body { height: 100%; }
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
+/* ── NAV SIDEBAR ─────────────────────────────────────────────── */
+#nav{
+  width:var(--nav-w);flex-shrink:0;
+  background:var(--s1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100vh;
+  transition:width .2s;overflow:hidden;z-index:100;
 }
+#nav.expanded{width:var(--nav-exp);}
+.nav-logo{
+  height:56px;display:flex;align-items:center;padding:0 14px;
+  font-size:.6rem;letter-spacing:.28em;font-weight:700;color:var(--gold);
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+.nav-logo .logo-short{margin-right:12px;font-size:.85rem;}
+.nav-logo .logo-full{opacity:0;transition:opacity .15s;pointer-events:none;}
+#nav.expanded .nav-logo .logo-full{opacity:1;}
+.nav-toggle{
+  position:absolute;top:16px;left:calc(var(--nav-w) - 1px);
+  width:20px;height:24px;background:var(--s2);border:1px solid var(--border);
+  border-radius:0 var(--r) var(--r) 0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;color:var(--muted);transition:left .2s;
+}
+.nav-toggle:hover{color:var(--text);}
+#nav.expanded .nav-toggle{left:calc(var(--nav-exp) - 1px);}
+.nav-items{flex:1;padding:.5rem 0;overflow-y:auto;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:.65rem 16px;cursor:pointer;white-space:nowrap;
+  color:var(--muted);transition:background .15s,color .15s;
+  border-left:2px solid transparent;
+}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.nav-item.active{border-left-color:var(--gold);color:var(--gold);background:rgba(184,149,90,.06);}
+.nav-icon{width:24px;text-align:center;flex-shrink:0;font-size:14px;font-style:normal;}
+.nav-label{font-size:.8rem;font-weight:500;opacity:0;transition:opacity .15s;}
+#nav.expanded .nav-label{opacity:1;}
+.nav-bottom{padding:.5rem 0;border-top:1px solid var(--border);}
 
-/* ── UTILITIES ─────────────────────────────────────── */
-.hidden { display: none !important; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
-
-/* ── LOGIN ─────────────────────────────────────────── */
-#login-screen {
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  padding: 2rem;
-}
-.login-card {
-  width: 100%; max-width: 380px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 2.5rem;
-}
-.login-logo {
-  font-size: .7rem; letter-spacing: .3em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 2rem;
-}
-.login-logo strong { color: var(--gold); font-weight: 600; }
-.login-title {
-  font-size: 1.3rem; font-weight: 600; color: var(--text);
-  margin-bottom: .4rem;
-}
-.login-sub { font-size: .82rem; color: var(--muted); margin-bottom: 2rem; }
-
-.field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1.2rem; }
-.field label { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.field input {
-  background: var(--card); border: 1px solid var(--border);
-  color: var(--text); padding: .7rem .9rem; font-size: .88rem;
-  font-family: inherit; border-radius: var(--radius);
-  transition: border-color .2s; outline: none;
-}
-.field input:focus { border-color: var(--gold); }
-
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .7rem 1.4rem; font-size: .78rem; letter-spacing: .1em;
-  text-transform: uppercase; font-family: inherit; font-weight: 500;
-  cursor: pointer; border: none; border-radius: var(--radius);
-  transition: all .2s; white-space: nowrap;
-}
-.btn:active { transform: translateY(1px) scale(.99); }
-.btn-gold { background: var(--gold); color: #1a0e04; }
-.btn-gold:hover { background: var(--gold-lt); }
-.btn-outline {
-  background: transparent; border: 1px solid var(--border); color: var(--muted);
-}
-.btn-outline:hover { border-color: var(--border-hv); color: var(--text); }
-.btn-danger { background: transparent; border: 1px solid rgba(248,113,113,.3); color: var(--danger); }
-.btn-danger:hover { background: rgba(248,113,113,.1); }
-.btn-sm { padding: .4rem .8rem; font-size: .7rem; }
-.btn-full { width: 100%; }
-.btn:disabled { opacity: .45; pointer-events: none; }
-
-#login-error {
-  font-size: .78rem; color: var(--danger);
-  min-height: 1.2em; margin-bottom: 1rem;
-}
-.lockout-msg {
-  font-size: .78rem; color: var(--danger); text-align: center; margin-top: 1rem;
-}
-
-/* ── DASHBOARD ──────────────────────────────────────── */
-#dashboard-screen {
-  display: flex; flex-direction: column;
-  height: 100vh; overflow: hidden;
-}
+/* ── MAIN AREA ───────────────────────────────────────────────── */
+#workspace{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
 
 /* Top bar */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 1.5rem; height: 56px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0; gap: 1rem;
+#topbar{
+  height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.5rem;background:var(--s1);border-bottom:1px solid var(--border);
+  flex-shrink:0;gap:1rem;
 }
-.topbar-brand {
-  font-size: .72rem; letter-spacing: .28em; text-transform: uppercase;
-  font-weight: 600; color: var(--gold); white-space: nowrap;
+.topbar-title{font-size:.85rem;font-weight:600;color:var(--text);}
+.topbar-right{display:flex;align-items:center;gap:.6rem;}
+#dirty-badge{
+  font-size:.68rem;background:rgba(184,149,90,.15);color:var(--gold);
+  padding:.2rem .6rem;border-radius:2rem;
 }
-.topbar-actions { display: flex; align-items: center; gap: .8rem; }
-.dirty-badge {
-  font-size: .7rem; letter-spacing: .05em;
-  background: rgba(184,149,90,.15); color: var(--gold);
-  padding: .25rem .6rem; border-radius: 2rem;
-}
-.preview-link {
-  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--muted); text-decoration: none;
-  transition: color .2s;
-}
-.preview-link:hover { color: var(--text); }
+.preview-link{font-size:.72rem;color:var(--muted);text-decoration:none;letter-spacing:.06em;}
+.preview-link:hover{color:var(--text);}
 
-/* Main layout */
-.dashboard-body {
-  display: flex; flex: 1; overflow: hidden;
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.55rem 1.1rem;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+  font-family:inherit;font-weight:600;cursor:pointer;border:none;border-radius:var(--r);
+  transition:all .15s;white-space:nowrap;
 }
-
-/* Sidebar */
-.sidebar {
-  width: 220px; flex-shrink: 0;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  padding: 1.5rem 0;
-  overflow-y: auto;
-}
-.sidebar-section-label {
-  font-size: .62rem; letter-spacing: .2em; text-transform: uppercase;
-  color: var(--muted); padding: 0 1.2rem 0.6rem;
-}
-.sidebar-item {
-  display: flex; align-items: center; gap: .7rem;
-  padding: .6rem 1.2rem; cursor: pointer;
-  font-size: .82rem; color: var(--muted);
-  transition: background .15s, color .15s;
-  border-left: 2px solid transparent;
-}
-.sidebar-item:hover { background: rgba(255,255,255,.04); color: var(--text); }
-.sidebar-item.active {
-  border-left-color: var(--gold); color: var(--gold);
-  background: rgba(184,149,90,.07);
-}
-.sidebar-icon { width: 16px; text-align: center; font-style: normal; flex-shrink: 0; }
-
-/* Main content */
-.main {
-  flex: 1; overflow-y: auto;
-  padding: 2rem 2.5rem;
-}
-.section-head { margin-bottom: 2rem; }
-.section-head h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: .25rem; }
-.section-head p  { font-size: .82rem; color: var(--muted); }
-
-/* Fields */
-.fields-grid { display: flex; flex-direction: column; gap: 1.4rem; }
-.cms-field { display: flex; flex-direction: column; gap: .5rem; }
-.cms-label {
-  font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--muted); display: flex; align-items: center; gap: .5rem;
-}
-.cms-label .type-badge {
-  font-size: .58rem; background: rgba(255,255,255,.06);
-  padding: .15rem .4rem; border-radius: 2px; text-transform: none; letter-spacing: 0;
-}
-.cms-input, .cms-textarea {
-  background: var(--card); border: 1px solid var(--border);
-  color: var(--text); padding: .65rem .85rem; font-size: .85rem;
-  font-family: inherit; border-radius: var(--radius);
-  transition: border-color .2s; outline: none; width: 100%;
-}
-.cms-input:focus, .cms-textarea:focus { border-color: var(--gold); }
-.cms-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-.cms-textarea.html-field { font-family: 'Courier New', monospace; font-size: .8rem; min-height: 80px; }
-.field-hint {
-  font-size: .7rem; color: var(--muted);
-  display: flex; align-items: center; gap: .3rem;
-}
-.dirty-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gold); flex-shrink: 0; display: none;
-}
-.cms-field.is-dirty .dirty-dot { display: inline-block; }
-
-/* Image field */
-.image-field { display: flex; flex-direction: column; gap: .8rem; }
-.image-preview {
-  width: 120px; height: 80px; border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; background: var(--card);
-  display: flex; align-items: center; justify-content: center;
-}
-.image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.image-preview .no-img { font-size: .7rem; color: var(--muted); }
-.image-actions { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
-.upload-progress {
-  font-size: .72rem; color: var(--gold); display: none;
-}
-
-/* FAQ editor */
-.faq-editor { display: flex; flex-direction: column; gap: 1rem; }
-.faq-pair {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem;
-  display: flex; flex-direction: column; gap: .6rem;
-}
-.faq-pair-num {
-  font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: .2rem;
-}
-.faq-pair-row { display: flex; gap: .5rem; align-items: flex-start; }
-.faq-pair-row .cms-input,
-.faq-pair-row .cms-textarea { flex: 1; }
-.faq-add { margin-top: .5rem; }
-
-/* Toast */
-.toast {
-  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
-  padding: .75rem 1.2rem; border-radius: var(--radius);
-  font-size: .82rem; font-weight: 500;
-  transform: translateY(8px); opacity: 0;
-  transition: all .3s; pointer-events: none;
-  display: flex; align-items: center; gap: .6rem;
-}
-.toast.show { transform: none; opacity: 1; }
-.toast.success { background: #14532d; color: var(--success); border: 1px solid #166534; }
-.toast.error   { background: #450a0a; color: var(--danger);  border: 1px solid #7f1d1d; }
-
-/* Divider */
-.fields-divider {
-  border: none; border-top: 1px solid var(--border);
-  margin: .5rem 0;
-}
+.btn:active{transform:translateY(1px);}
+.btn-gold{background:var(--gold);color:#1a0c03;}
+.btn-gold:hover{background:var(--gold-lt);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--borderact);color:var(--text);}
+.btn-danger{background:transparent;border:1px solid rgba(248,113,113,.3);color:var(--danger);}
+.btn-danger:hover{background:rgba(248,113,113,.08);}
+.btn-sm{padding:.35rem .7rem;font-size:.67rem;}
+.btn-xs{padding:.2rem .5rem;font-size:.62rem;}
+.btn-full{width:100%;}
+.btn:disabled{opacity:.4;pointer-events:none;}
 
 /* Spinner */
-@keyframes spin { to { transform: rotate(360deg); } }
-.spinner {
-  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.2);
-  border-top-color: currentColor; border-radius: 50%;
-  animation: spin .7s linear infinite; flex-shrink: 0;
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.15);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;}
+
+/* ── CONTENT PANEL ───────────────────────────────────────────── */
+#content-area{
+  flex:1;display:flex;overflow:hidden;
 }
+.panel{
+  flex:1;overflow-y:auto;padding:2rem 2.5rem;
+  display:flex;flex-direction:column;gap:1.5rem;
+}
+.panel-head{margin-bottom:.5rem;}
+.panel-head h2{font-size:1rem;font-weight:600;color:var(--text);}
+.panel-head p{font-size:.78rem;color:var(--muted);margin-top:.25rem;}
+
+/* Section list (page builder) */
+#sections-list{display:flex;flex-direction:column;gap:.5rem;}
+.section-item{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.75rem 1rem;background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);cursor:default;transition:border-color .15s;
+}
+.section-item:hover{border-color:var(--borderact);}
+.section-item.dragging{opacity:.4;}
+.section-item.drag-over{border-color:var(--gold);background:rgba(184,149,90,.07);}
+.drag-handle{
+  cursor:grab;color:var(--muted);font-size:1rem;
+  padding:0 2px;user-select:none;flex-shrink:0;
+}
+.drag-handle:active{cursor:grabbing;}
+.section-icon{width:22px;text-align:center;color:var(--muted);flex-shrink:0;font-size:12px;}
+.section-name{flex:1;font-size:.82rem;font-weight:500;}
+.section-actions{display:flex;align-items:center;gap:.4rem;}
+.vis-toggle{
+  width:34px;height:20px;background:rgba(255,255,255,.1);
+  border-radius:10px;cursor:pointer;position:relative;border:none;
+  transition:background .2s;flex-shrink:0;
+}
+.vis-toggle::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:14px;height:14px;background:#fff;border-radius:50%;
+  transition:left .2s;
+}
+.vis-toggle.on{background:var(--gold);}
+.vis-toggle.on::after{left:17px;}
+
+/* Add section modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;padding:1rem;
+}
+.modal{
+  background:var(--s2);border:1px solid var(--border);
+  width:100%;max-width:580px;max-height:80vh;overflow-y:auto;
+  border-radius:var(--r);
+}
+.modal-head{
+  padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-head h3{font-size:.9rem;font-weight:600;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:1.5rem;}
+.section-templates{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;}
+.tpl-card{
+  padding:1rem;background:var(--s3);border:1px solid var(--border);
+  border-radius:var(--r);cursor:pointer;text-align:center;
+  transition:border-color .15s,background .15s;
+}
+.tpl-card:hover{border-color:var(--gold);background:rgba(184,149,90,.06);}
+.tpl-icon{font-size:1.5rem;margin-bottom:.5rem;}
+.tpl-name{font-size:.75rem;font-weight:600;color:var(--text);}
+.tpl-desc{font-size:.65rem;color:var(--muted);margin-top:.2rem;}
+
+/* Pages list */
+.pages-grid{display:flex;flex-direction:column;gap:.6rem;}
+.page-card{
+  display:flex;align-items:center;gap:1rem;
+  padding:.85rem 1rem;background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);transition:border-color .15s;
+}
+.page-card:hover{border-color:var(--borderact);}
+.page-status{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  background:var(--success);
+}
+.page-status.draft{background:var(--muted);}
+.page-info{flex:1;}
+.page-title{font-size:.85rem;font-weight:600;}
+.page-slug{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
+.page-actions{display:flex;gap:.4rem;}
+
+/* New page form */
+.new-page-form{
+  background:var(--s2);border:1px solid var(--border);
+  padding:1.2rem;border-radius:var(--r);
+  display:flex;flex-direction:column;gap:.8rem;
+}
+
+/* Fields */
+.cms-field{display:flex;flex-direction:column;gap:.4rem;}
+.cms-label{
+  font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:.4rem;
+}
+.type-badge{
+  font-size:.58rem;background:rgba(255,255,255,.06);
+  padding:.1rem .35rem;border-radius:2px;text-transform:none;letter-spacing:0;
+}
+.dirty-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0;display:none;}
+.cms-field.is-dirty .dirty-dot{display:inline-block;}
+.cms-input,.cms-textarea{
+  background:var(--s3);border:1px solid var(--border);color:var(--text);
+  padding:.6rem .8rem;font-size:.83rem;font-family:inherit;
+  border-radius:var(--r);transition:border-color .15s;outline:none;width:100%;
+}
+.cms-input:focus,.cms-textarea:focus{border-color:var(--gold);}
+.cms-textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.cms-textarea.html-field{font-family:'Courier New',monospace;font-size:.76rem;}
+.field-hint{font-size:.68rem;color:var(--muted);}
+.fields-grid{display:flex;flex-direction:column;gap:1.2rem;}
+.fields-divider{border:none;border-top:1px solid var(--border);margin:.25rem 0;}
+
+/* Image field */
+.image-field{display:flex;flex-direction:column;gap:.7rem;}
+.image-preview{
+  width:100px;height:68px;border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;background:var(--s3);display:flex;align-items:center;justify-content:center;
+}
+.image-preview img{width:100%;height:100%;object-fit:cover;}
+.no-img{font-size:.65rem;color:var(--muted);}
+.image-actions{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;}
+
+/* FAQ editor */
+.faq-editor{display:flex;flex-direction:column;gap:.75rem;}
+.faq-pair{
+  background:var(--s3);border:1px solid var(--border);
+  border-radius:var(--r);padding:.85rem;
+  display:flex;flex-direction:column;gap:.5rem;
+}
+.faq-pair-num{font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.faq-pair-row{display:flex;gap:.4rem;align-items:flex-start;}
+.faq-pair-row .cms-input,.faq-pair-row .cms-textarea{flex:1;}
+
+/* Design panel */
+.design-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;}
+.color-field{display:flex;flex-direction:column;gap:.4rem;}
+.color-row{display:flex;align-items:center;gap:.6rem;}
+.color-swatch{
+  width:36px;height:36px;border-radius:var(--r);
+  border:1px solid var(--border);cursor:pointer;
+  padding:0;background:none;flex-shrink:0;overflow:hidden;
+}
+.color-swatch input[type=color]{
+  width:200%;height:200%;border:none;padding:0;
+  cursor:pointer;margin:-25% 0 0 -25%;
+}
+.color-val{
+  flex:1;background:var(--s3);border:1px solid var(--border);
+  color:var(--text);padding:.4rem .6rem;font-size:.75rem;
+  font-family:'Courier New',monospace;border-radius:var(--r);outline:none;
+}
+.color-val:focus{border-color:var(--gold);}
+
+/* Media library */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.6rem;}
+.media-item{
+  position:relative;border-radius:var(--r);overflow:hidden;
+  border:1px solid var(--border);aspect-ratio:1;cursor:pointer;
+  transition:border-color .15s;
+}
+.media-item:hover{border-color:var(--gold);}
+.media-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.media-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.7);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;
+  opacity:0;transition:opacity .15s;
+}
+.media-item:hover .media-overlay{opacity:1;}
+.media-filename{font-size:.6rem;color:rgba(255,255,255,.6);padding:.2rem .4rem;text-align:center;word-break:break-all;}
+.upload-zone{
+  border:2px dashed var(--border);border-radius:var(--r);padding:2rem;
+  text-align:center;cursor:pointer;transition:border-color .15s,background .15s;
+}
+.upload-zone:hover,.upload-zone.drag-active{
+  border-color:var(--gold);background:rgba(184,149,90,.05);
+}
+.upload-zone p{font-size:.78rem;color:var(--muted);margin-top:.5rem;}
+
+/* Dashboard stats */
+.stats-row{display:flex;gap:.8rem;flex-wrap:wrap;}
+.stat-card{
+  background:var(--s2);border:1px solid var(--border);
+  padding:1rem 1.2rem;border-radius:var(--r);min-width:120px;
+}
+.stat-val{font-size:1.6rem;font-weight:700;color:var(--gold);}
+.stat-lbl{font-size:.68rem;color:var(--muted);margin-top:.1rem;text-transform:uppercase;letter-spacing:.08em;}
+.quick-actions{display:flex;gap:.6rem;flex-wrap:wrap;}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
+  padding:.65rem 1.1rem;border-radius:var(--r);font-size:.78rem;font-weight:500;
+  transform:translateY(8px);opacity:0;transition:all .25s;pointer-events:none;
+  display:flex;align-items:center;gap:.5rem;
+}
+.toast.show{transform:none;opacity:1;}
+.toast.success{background:#14532d;color:var(--success);border:1px solid #166534;}
+.toast.error{background:#450a0a;color:var(--danger);border:1px solid #7f1d1d;}
+.toast.info{background:#1e3a5f;color:var(--info);border:1px solid #1d4ed8;}
+
+/* Login */
+#login-screen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);z-index:300;padding:1.5rem;
+}
+.login-card{width:100%;max-width:360px;background:var(--s2);border:1px solid var(--border);padding:2.2rem;}
+.login-logo{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:1.8rem;}
+.login-logo strong{color:var(--gold);}
+.login-card h1{font-size:1.1rem;font-weight:600;margin-bottom:.3rem;}
+.login-card p{font-size:.78rem;color:var(--muted);margin-bottom:1.8rem;}
+.field-group{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+.field-group label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+#login-error{font-size:.75rem;color:var(--danger);min-height:1.2em;margin-bottom:.8rem;}
+.lockout{font-size:.75rem;color:var(--danger);text-align:center;margin-top:.8rem;}
 
 /* Config warning */
-.config-warning {
-  background: #1c0e02; border: 1px solid rgba(184,149,90,.3);
-  padding: 1.5rem; text-align: center; margin: 2rem;
-  border-radius: var(--radius);
+.config-warn{
+  max-width:400px;margin:2rem auto;text-align:center;
+  background:rgba(184,149,90,.07);border:1px solid rgba(184,149,90,.2);padding:1.5rem;border-radius:var(--r);
 }
-.config-warning h3 { color: var(--gold); margin-bottom: .5rem; font-size: .95rem; }
-.config-warning p  { font-size: .82rem; color: var(--muted); line-height: 1.7; }
-.config-warning code {
-  background: rgba(255,255,255,.06); padding: .1rem .4rem;
-  border-radius: 2px; font-size: .78rem; color: var(--text);
+.config-warn h3{color:var(--gold);margin-bottom:.5rem;}
+.config-warn p{font-size:.78rem;color:var(--muted);line-height:1.7;}
+.config-warn code{background:rgba(255,255,255,.06);padding:.1rem .35rem;border-radius:2px;font-size:.75rem;}
+
+/* Section sub-nav (for content editing per section) */
+.section-tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+.section-tab{
+  padding:.4rem .85rem;font-size:.72rem;border-radius:2rem;cursor:pointer;
+  background:var(--s2);border:1px solid var(--border);color:var(--muted);
+  transition:all .15s;
 }
+.section-tab:hover{color:var(--text);border-color:var(--borderact);}
+.section-tab.active{background:var(--gold);color:#1a0c03;border-color:var(--gold);font-weight:600;}
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
 
-@media (max-width: 640px) {
-  .sidebar { width: 180px; }
-  .main { padding: 1.5rem; }
-  .topbar { padding: 0 1rem; }
+@media(max-width:640px){
+  #nav{position:fixed;z-index:200;}
+  .section-templates{grid-template-columns:repeat(2,1fr);}
+  .design-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 
-<!-- ── LOGIN ──────────────────────────────────────────── -->
+<!-- Login -->
 <div id="login-screen">
   <div class="login-card">
     <p class="login-logo"><strong>BROW</strong> ✦ <strong>DERMA</strong></p>
-    <h1 class="login-title">Administration</h1>
-    <p class="login-sub">Connectez-vous pour modifier le site.</p>
+    <h1>Administration</h1>
+    <p>Connectez-vous pour gérer votre site.</p>
     <div id="login-error" role="alert"></div>
     <form id="login-form">
-      <div class="field">
-        <label for="l-email">Adresse email</label>
-        <input id="l-email" type="email" autocomplete="email" placeholder="admin@email.com" required>
+      <div class="field-group">
+        <label>Email</label>
+        <input class="cms-input" id="l-email" type="email" autocomplete="email" placeholder="admin@email.com" required>
       </div>
-      <div class="field">
-        <label for="l-pass">Mot de passe</label>
-        <input id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      <div class="field-group">
+        <label>Mot de passe</label>
+        <input class="cms-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••" required>
       </div>
       <button type="submit" class="btn btn-gold btn-full" id="login-btn">Se connecter</button>
     </form>
-    <p class="lockout-msg hidden" id="lockout-msg"></p>
+    <p class="lockout hidden" id="lockout-msg"></p>
   </div>
 </div>
 
-<!-- ── DASHBOARD ───────────────────────────────────────── -->
-<div id="dashboard-screen" class="hidden">
-  <header class="topbar">
-    <span class="topbar-brand">BD Admin</span>
-    <div class="topbar-actions">
-      <span class="dirty-badge hidden" id="dirty-badge">0 modification(s)</span>
-      <a href="../index.html" target="_blank" class="preview-link">Voir le site ↗</a>
-      <button class="btn btn-gold btn-sm" id="publish-btn">Publier</button>
-      <button class="btn btn-outline btn-sm" id="logout-btn">Déconnexion</button>
+<!-- App shell -->
+<nav id="nav">
+  <div class="nav-logo">
+    <span class="logo-short">BD</span>
+    <span class="logo-full">BROW DERMA ADMIN</span>
+  </div>
+  <div class="nav-items" id="nav-items"></div>
+  <div class="nav-bottom" id="nav-bottom"></div>
+</nav>
+<button class="nav-toggle" id="nav-toggle" aria-label="Réduire/agrandir">›</button>
+
+<div id="workspace">
+  <header id="topbar">
+    <span class="topbar-title" id="topbar-title">Tableau de bord</span>
+    <div class="topbar-right">
+      <span class="dirty-badge hidden" id="dirty-badge"></span>
+      <a href="../" target="_blank" class="preview-link">Voir le site ↗</a>
+      <button class="btn btn-gold btn-sm" id="publish-btn" disabled>Publier</button>
     </div>
   </header>
-  <div class="dashboard-body">
-    <nav class="sidebar" id="sidebar"></nav>
-    <main class="main" id="main-content"></main>
+  <div id="content-area">
+    <div class="panel" id="panel"></div>
   </div>
 </div>
 
-<!-- Toast notification -->
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<!-- Modal overlay -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Ajouter une section</h3>
+      <button class="modal-close" id="modal-close">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status"></div>
 
 <script>
-(function () {
+(function(){
 'use strict';
 
-// ── CONFIG CHECK ────────────────────────────────────────────
-var cfg = window.CMS_CONFIG;
+// ── CONFIG ──────────────────────────────────────────────────────
+var cfg   = window.CMS_CONFIG;
 var cfgOk = cfg && cfg.url && cfg.url !== 'YOUR_SUPABASE_URL';
+var sb    = null;
 
-// ── SECTIONS DEFINITION ─────────────────────────────────────
-var SECTIONS = [
-  { id:'seo', label:'SEO', icon:'◎', desc:'Titre, description et balises de partage réseaux sociaux.', fields:[
-    { key:'seo.title',          label:'Titre de page',             type:'text'     },
-    { key:'seo.description',    label:'Meta description',          type:'textarea' },
-    { key:'seo.og_title',       label:'OG Title (réseaux sociaux)',type:'text'     },
-    { key:'seo.og_description', label:'OG Description',            type:'textarea' },
+// ── STATE ────────────────────────────────────────────────────────
+var S = {
+  view:     'dashboard',
+  content:  {},    // key → row
+  sections: [],    // page_sections rows
+  pages:    [],    // pages rows
+  media:    [],    // storage objects
+  dirty:    {},    // key → new value
+  dirtySection: false,
+  saving:   false,
+  activeContentSection: 'seo'
+};
+
+// ── VIEWS ─────────────────────────────────────────────────────────
+var VIEWS = [
+  { id:'dashboard',  label:'Tableau de bord', icon:'⊞' },
+  { id:'pages',      label:'Pages',           icon:'◻' },
+  { id:'sections',   label:'Mise en page',    icon:'⠿' },
+  { id:'content',    label:'Contenu',         icon:'✏' },
+  { id:'design',     label:'Design',          icon:'◑' },
+  { id:'media',      label:'Médias',          icon:'⊡' },
+  { id:'seo',        label:'SEO',             icon:'◎' },
+  { id:'settings',   label:'Paramètres',      icon:'⚙' },
+];
+
+// ── CONTENT SECTIONS ─────────────────────────────────────────────
+var CONTENT_SECTIONS = [
+  { id:'seo', label:'SEO', fields:[
+    {key:'seo.title',          label:'Titre de page',       type:'text'},
+    {key:'seo.description',    label:'Meta description',    type:'textarea'},
+    {key:'seo.og_title',       label:'OG Title',            type:'text'},
+    {key:'seo.og_description', label:'OG Description',      type:'textarea'},
   ]},
-  { id:'hero', label:'Héro', icon:'⬛', desc:'Section d\'accueil visible en premier à l\'ouverture du site.', fields:[
-    { key:'hero.eyebrow',    label:'Accroche (texte doré)',  type:'text'     },
-    { key:'hero.title',      label:'Titre principal',        type:'html',     hint:'Balises supportées : &lt;br&gt; &lt;em&gt; &lt;strong&gt;' },
-    { key:'hero.subtitle',   label:'Sous-titre',             type:'textarea' },
-    { key:'hero.cta_primary',label:'Bouton principal',       type:'text'     },
-    { key:'hero.badge_label',label:'Badge — texte',          type:'text'     },
-    { key:'hero.badge_value',label:'Badge — valeur',         type:'text'     },
-    { key:'hero.image',      label:'Image héro',             type:'image'    },
+  { id:'hero', label:'Héro', fields:[
+    {key:'hero.eyebrow',    label:'Accroche dorée',    type:'text'},
+    {key:'hero.title',      label:'Titre principal',   type:'html', hint:'&lt;br&gt; &lt;em&gt; supportés'},
+    {key:'hero.subtitle',   label:'Sous-titre',        type:'textarea'},
+    {key:'hero.cta_primary',label:'Bouton principal',  type:'text'},
+    {key:'hero.badge_label',label:'Badge — texte',     type:'text'},
+    {key:'hero.badge_value',label:'Badge — valeur',    type:'text'},
+    {key:'hero.image',      label:'Image héro',        type:'image'},
   ]},
-  { id:'intro', label:'Introduction', icon:'◈', desc:'Bande de texte après le héro avec le chiffre clé.', fields:[
-    { key:'intro.stat_number', label:'Chiffre',           type:'text' },
-    { key:'intro.stat_label',  label:'Label du chiffre',  type:'html', hint:'Balise &lt;br&gt; pour les sauts de ligne' },
-    { key:'intro.quote',       label:'Phrase d\'accroche', type:'html', hint:'&lt;em&gt; pour surligner en doré' },
+  { id:'intro', label:'Introduction', fields:[
+    {key:'intro.stat_number', label:'Chiffre',          type:'text'},
+    {key:'intro.stat_label',  label:'Label du chiffre', type:'html', hint:'&lt;br&gt; supporté'},
+    {key:'intro.quote',       label:'Citation',         type:'html', hint:'&lt;em&gt; pour le doré'},
   ]},
-  { id:'prestations', label:'Prestations', icon:'✦', desc:'Les trois cartes de services (Microblading, Powder Brows, Combo Brow).', fields:[
-    { key:'presta.1.tag',     label:'Carte 1 — Catégorie',   type:'text'     },
-    { key:'presta.1.name',    label:'Carte 1 — Nom',         type:'text'     },
-    { key:'presta.1.subtitle',label:'Carte 1 — Sous-titre',  type:'text'     },
-    { key:'presta.1.desc',    label:'Carte 1 — Description', type:'textarea' },
-    null, // divider
-    { key:'presta.2.tag',     label:'Carte 2 — Catégorie',   type:'text'     },
-    { key:'presta.2.name',    label:'Carte 2 — Nom',         type:'text'     },
-    { key:'presta.2.subtitle',label:'Carte 2 — Sous-titre',  type:'text'     },
-    { key:'presta.2.desc',    label:'Carte 2 — Description', type:'textarea' },
+  { id:'prestations', label:'Prestations', fields:[
     null,
-    { key:'presta.3.tag',     label:'Carte 3 — Catégorie',   type:'text'     },
-    { key:'presta.3.name',    label:'Carte 3 — Nom',         type:'text'     },
-    { key:'presta.3.subtitle',label:'Carte 3 — Sous-titre',  type:'text'     },
-    { key:'presta.3.desc',    label:'Carte 3 — Description', type:'textarea' },
-  ]},
-  { id:'tarifs', label:'Tarifs', icon:'€', desc:'Prix des prestations et des retouches.', fields:[
-    { key:'tarif.microblading.price',    label:'Microblading — prix (€)',       type:'text' },
-    { key:'tarif.powder.price',          label:'Powder Brows — prix (€)',       type:'text' },
-    { key:'tarif.combo.price',           label:'Combo Brows — prix (€)',        type:'text' },
+    {key:'presta.1.tag',     label:'Carte 1 — Catégorie',   type:'text'},
+    {key:'presta.1.name',    label:'Carte 1 — Nom',         type:'text'},
+    {key:'presta.1.subtitle',label:'Carte 1 — Sous-titre',  type:'text'},
+    {key:'presta.1.desc',    label:'Carte 1 — Description', type:'textarea'},
     null,
-    { key:'tarif.retouche.micro.6m',     label:'Retouche Micro < 6 mois',      type:'text' },
-    { key:'tarif.retouche.micro.12m',    label:'Retouche Micro 6–12 mois',     type:'text' },
-    { key:'tarif.retouche.micro.18m',    label:'Retouche Micro 12–18 mois',    type:'text' },
-    { key:'tarif.retouche.micro.18plus', label:'Retouche Micro > 18 mois',     type:'text' },
+    {key:'presta.2.tag',     label:'Carte 2 — Catégorie',   type:'text'},
+    {key:'presta.2.name',    label:'Carte 2 — Nom',         type:'text'},
+    {key:'presta.2.subtitle',label:'Carte 2 — Sous-titre',  type:'text'},
+    {key:'presta.2.desc',    label:'Carte 2 — Description', type:'textarea'},
     null,
-    { key:'tarif.retouche.powder.12m',   label:'Retouche Powder < 12 mois',    type:'text' },
-    { key:'tarif.retouche.powder.18m',   label:'Retouche Powder 12–18 mois',   type:'text' },
-    { key:'tarif.retouche.powder.24m',   label:'Retouche Powder 18–24 mois',   type:'text' },
+    {key:'presta.3.tag',     label:'Carte 3 — Catégorie',   type:'text'},
+    {key:'presta.3.name',    label:'Carte 3 — Nom',         type:'text'},
+    {key:'presta.3.subtitle',label:'Carte 3 — Sous-titre',  type:'text'},
+    {key:'presta.3.desc',    label:'Carte 3 — Description', type:'textarea'},
+  ]},
+  { id:'tarifs', label:'Tarifs', fields:[
+    {key:'tarif.microblading.price',    label:'Microblading (€)',           type:'text'},
+    {key:'tarif.powder.price',          label:'Powder Brows (€)',           type:'text'},
+    {key:'tarif.combo.price',           label:'Combo Brows (€)',            type:'text'},
     null,
-    { key:'tarif.retouche.combo.12m',    label:'Retouche Combo < 12 mois',     type:'text' },
-    { key:'tarif.retouche.combo.18m',    label:'Retouche Combo 12–18 mois',    type:'text' },
-    { key:'tarif.retouche.combo.24m',    label:'Retouche Combo 18–24 mois',    type:'text' },
+    {key:'tarif.retouche.micro.6m',     label:'Retouche Micro < 6 mois',   type:'text'},
+    {key:'tarif.retouche.micro.12m',    label:'Retouche Micro 6–12 mois',  type:'text'},
+    {key:'tarif.retouche.micro.18m',    label:'Retouche Micro 12–18 mois', type:'text'},
+    {key:'tarif.retouche.micro.18plus', label:'Retouche Micro > 18 mois',  type:'text'},
+    null,
+    {key:'tarif.retouche.powder.12m',   label:'Retouche Powder < 12 mois', type:'text'},
+    {key:'tarif.retouche.powder.18m',   label:'Retouche Powder 12–18 mois',type:'text'},
+    {key:'tarif.retouche.powder.24m',   label:'Retouche Powder 18–24 mois',type:'text'},
+    null,
+    {key:'tarif.retouche.combo.12m',    label:'Retouche Combo < 12 mois',  type:'text'},
+    {key:'tarif.retouche.combo.18m',    label:'Retouche Combo 12–18 mois', type:'text'},
+    {key:'tarif.retouche.combo.24m',    label:'Retouche Combo 18–24 mois', type:'text'},
   ]},
-  { id:'apropos', label:'À propos', icon:'◉', desc:'Section présentation du studio et des valeurs.', fields:[
-    { key:'apropos.text1', label:'Paragraphe 1', type:'html',     hint:'&lt;strong&gt; pour le gras' },
-    { key:'apropos.text2', label:'Paragraphe 2', type:'textarea' },
+  { id:'apropos', label:'À propos', fields:[
+    {key:'apropos.text1', label:'Paragraphe 1', type:'html', hint:'&lt;strong&gt; pour gras'},
+    {key:'apropos.text2', label:'Paragraphe 2', type:'textarea'},
   ]},
-  { id:'faq', label:'FAQ', icon:'?', desc:'Questions fréquentes — ajoutez, modifiez ou supprimez des questions.', fields:[
-    { key:'faq.items', label:'Questions / Réponses', type:'faq' },
+  { id:'faq', label:'FAQ', fields:[
+    {key:'faq.items', label:'Questions / Réponses', type:'faq'},
   ]},
-  { id:'contact', label:'Contact', icon:'✉', desc:'Coordonnées affichées sur le site.', fields:[
-    { key:'contact.address',   label:'Adresse',           type:'text' },
-    { key:'contact.phone',     label:'Téléphone',         type:'text' },
-    { key:'contact.email',     label:'Email',             type:'text' },
-    { key:'contact.instagram', label:'Instagram (@handle)', type:'text' },
+  { id:'contact', label:'Contact', fields:[
+    {key:'contact.address',   label:'Adresse',   type:'text'},
+    {key:'contact.phone',     label:'Téléphone', type:'text'},
+    {key:'contact.email',     label:'Email',     type:'text'},
+    {key:'contact.instagram', label:'Instagram', type:'text'},
   ]},
 ];
 
-// ── STATE ────────────────────────────────────────────────────
-var sb    = null;
-var state = { content:{}, dirty:{}, section:'seo', saving:false };
+var DESIGN_COLORS = [
+  {key:'design.color.gold',    label:'Or (accent)',  var:'--gold'},
+  {key:'design.color.gold-lt', label:'Or clair',     var:'--gold-lt'},
+  {key:'design.color.ivory',   label:'Ivoire',       var:'--ivory'},
+  {key:'design.color.cream',   label:'Crème',        var:'--cream'},
+  {key:'design.color.blush',   label:'Blush',        var:'--blush'},
+  {key:'design.color.ink',     label:'Encre (texte)',var:'--ink'},
+  {key:'design.color.white',   label:'Fond clair',   var:'--white'},
+];
 
-// ── BRUTE FORCE PROTECTION ───────────────────────────────────
-var BF_KEY = 'bd_admin_bf';
-function bfGet()  { try { return JSON.parse(localStorage.getItem(BF_KEY)) || {attempts:0,until:0}; } catch(e){ return {attempts:0,until:0}; } }
-function bfSet(o) { localStorage.setItem(BF_KEY, JSON.stringify(o)); }
-function bfCheck() {
-  var d = bfGet(); var now = Date.now();
-  if (d.until && now < d.until) {
-    var mins = Math.ceil((d.until - now) / 60000);
-    return 'Compte bloqué. Réessayez dans ' + mins + ' minute(s).';
-  }
-  return null;
-}
-function bfFail() {
-  var d = bfGet(); d.attempts = (d.attempts||0) + 1;
-  if (d.attempts >= 5) { d.until = Date.now() + 15*60*1000; d.attempts = 0; }
-  bfSet(d);
-}
-function bfReset() { bfSet({attempts:0,until:0}); }
+// ── BRUTE FORCE ──────────────────────────────────────────────────
+var BF = 'bd_bf';
+function bfGet(){try{return JSON.parse(localStorage.getItem(BF))||{a:0,u:0};}catch(e){return{a:0,u:0};}}
+function bfSet(o){localStorage.setItem(BF,JSON.stringify(o));}
+function bfCheck(){var d=bfGet(),n=Date.now();if(d.u&&n<d.u){var m=Math.ceil((d.u-n)/60000);return 'Bloqué. Réessayez dans '+m+' min.';}return null;}
+function bfFail(){var d=bfGet();d.a=(d.a||0)+1;if(d.a>=5){d.u=Date.now()+15*60000;d.a=0;}bfSet(d);}
+function bfReset(){bfSet({a:0,u:0});}
 
-// ── TOAST ────────────────────────────────────────────────────
-var toastTimer = null;
-function toast(msg, type) {
-  var el = document.getElementById('toast');
-  el.textContent = msg; el.className = 'toast ' + (type||'success');
-  clearTimeout(toastTimer);
-  requestAnimationFrame(function(){ el.classList.add('show'); });
-  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3500);
+// ── TOAST ────────────────────────────────────────────────────────
+var _tt=null;
+function toast(msg,type){
+  var el=document.getElementById('toast');
+  el.innerHTML=msg;el.className='toast '+(type||'success');
+  clearTimeout(_tt);
+  requestAnimationFrame(function(){el.classList.add('show');});
+  _tt=setTimeout(function(){el.classList.remove('show');},3500);
 }
 
-// ── SUPABASE INIT ────────────────────────────────────────────
-function initSB() {
-  if (!cfgOk) return;
-  sb = supabase.createClient(cfg.url, cfg.key);
+// ── DIRTY ────────────────────────────────────────────────────────
+function markDirty(key,val){S.dirty[key]=val;updateDirtyBadge();}
+function updateDirtyBadge(){
+  var n=Object.keys(S.dirty).length+(S.dirtySection?1:0);
+  var badge=document.getElementById('dirty-badge');
+  var btn=document.getElementById('publish-btn');
+  if(n>0){badge.textContent=n+' modif.';badge.classList.remove('hidden');}
+  else badge.classList.add('hidden');
+  if(btn)btn.disabled=(n===0);
 }
 
-// ── AUTH ─────────────────────────────────────────────────────
-function showLogin() {
-  document.getElementById('login-screen').classList.remove('hidden');
-  document.getElementById('dashboard-screen').classList.add('hidden');
-}
-function showDashboard() {
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('dashboard-screen').classList.remove('hidden');
-  loadContent();
+// ── ESC ──────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── SUPABASE ─────────────────────────────────────────────────────
+function initSB(){
+  if(!cfgOk)return;
+  sb=supabase.createClient(cfg.url,cfg.key);
 }
 
-document.getElementById('login-form').addEventListener('submit', async function(e) {
+// ── AUTH ─────────────────────────────────────────────────────────
+function showLogin(){document.getElementById('login-screen').classList.remove('hidden');}
+function hideLogin(){document.getElementById('login-screen').classList.add('hidden');}
+
+document.getElementById('login-form').addEventListener('submit',async function(e){
   e.preventDefault();
-  if (!cfgOk) { showConfigWarning(); return; }
-  var errEl  = document.getElementById('login-error');
-  var lockEl = document.getElementById('lockout-msg');
-  var btn    = document.getElementById('login-btn');
-
-  var locked = bfCheck();
-  if (locked) { lockEl.textContent = locked; lockEl.classList.remove('hidden'); return; }
-
-  var email = document.getElementById('l-email').value.trim();
-  var pass  = document.getElementById('l-pass').value;
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Connexion…';
-  errEl.textContent = '';
-
-  try {
-    var res = await sb.auth.signInWithPassword({ email: email, password: pass });
-    if (res.error) {
-      bfFail();
-      var lk = bfCheck();
-      if (lk) { lockEl.textContent = lk; lockEl.classList.remove('hidden'); }
-      errEl.textContent = 'Email ou mot de passe incorrect.';
-    } else {
-      bfReset();
-      showDashboard();
-    }
-  } catch(err) {
-    errEl.textContent = 'Erreur de connexion. Vérifiez votre configuration Supabase.';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Se connecter';
-  }
+  if(!cfgOk){showConfigWarn();return;}
+  var errEl=document.getElementById('login-error');
+  var lockEl=document.getElementById('lockout-msg');
+  var btn=document.getElementById('login-btn');
+  var lk=bfCheck();
+  if(lk){lockEl.textContent=lk;lockEl.classList.remove('hidden');return;}
+  var email=document.getElementById('l-email').value.trim();
+  var pass=document.getElementById('l-pass').value;
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';errEl.textContent='';
+  var res=await sb.auth.signInWithPassword({email:email,password:pass});
+  if(res.error){bfFail();var lk2=bfCheck();if(lk2){lockEl.textContent=lk2;lockEl.classList.remove('hidden');}errEl.textContent='Email ou mot de passe incorrect.';}
+  else{bfReset();hideLogin();loadAll();}
+  btn.disabled=false;btn.textContent='Se connecter';
 });
 
-document.getElementById('logout-btn').addEventListener('click', async function() {
-  if (sb) await sb.auth.signOut();
-  state.dirty = {};
-  showLogin();
+document.getElementById('publish-btn').addEventListener('click',publish);
+
+// ── NAV ──────────────────────────────────────────────────────────
+var navExpanded=false;
+document.getElementById('nav-toggle').addEventListener('click',function(){
+  navExpanded=!navExpanded;
+  var nav=document.getElementById('nav');
+  nav.classList.toggle('expanded',navExpanded);
+  this.textContent=navExpanded?'‹':'›';
+  this.style.left=navExpanded?'calc(var(--nav-exp) - 1px)':'calc(var(--nav-w) - 1px)';
 });
 
-// ── LOAD CONTENT ─────────────────────────────────────────────
-async function loadContent() {
-  if (!sb) return;
-  var res = await sb.from('content').select('*');
-  if (res.error) { toast('Erreur de chargement : ' + res.error.message, 'error'); return; }
-  state.content = {};
-  (res.data || []).forEach(function(row) {
-    state.content[row.key] = row;
+function buildNav(){
+  var ni=document.getElementById('nav-items');
+  ni.innerHTML='';
+  VIEWS.slice(0,-2).forEach(function(v){
+    var item=document.createElement('div');
+    item.className='nav-item'+(S.view===v.id?' active':'');
+    item.innerHTML='<i class="nav-icon">'+v.icon+'</i><span class="nav-label">'+v.label+'</span>';
+    item.addEventListener('click',function(){navigate(v.id);});
+    ni.appendChild(item);
   });
-  renderSidebar();
-  renderSection(state.section);
+  var nb=document.getElementById('nav-bottom');
+  nb.innerHTML='';
+  VIEWS.slice(-2).forEach(function(v){
+    var item=document.createElement('div');
+    item.className='nav-item'+(S.view===v.id?' active':'');
+    item.innerHTML='<i class="nav-icon">'+v.icon+'</i><span class="nav-label">'+v.label+'</span>';
+    item.addEventListener('click',function(){navigate(v.id);});
+    nb.appendChild(item);
+  });
+  // Logout
+  var logout=document.createElement('div');
+  logout.className='nav-item';
+  logout.innerHTML='<i class="nav-icon">⏻</i><span class="nav-label">Déconnexion</span>';
+  logout.addEventListener('click',async function(){if(sb)await sb.auth.signOut();showLogin();});
+  nb.appendChild(logout);
 }
 
-// ── PUBLISH ──────────────────────────────────────────────────
-document.getElementById('publish-btn').addEventListener('click', async function() {
-  var keys = Object.keys(state.dirty);
-  if (!keys.length) { toast('Aucune modification à publier.', 'success'); return; }
-  if (!sb) return;
+function navigate(viewId){
+  S.view=viewId;
+  document.getElementById('topbar-title').textContent=VIEWS.find(function(v){return v.id===viewId;})||{label:''};
+  var v=VIEWS.find(function(v){return v.id===viewId;});
+  if(v)document.getElementById('topbar-title').textContent=v.label;
+  buildNav();
+  renderPanel();
+}
 
-  var btn = document.getElementById('publish-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
-
-  var rows = keys.map(function(k) {
-    var orig = state.content[k] || {};
-    return { key:k, value:state.dirty[k], type:orig.type||'text', section:orig.section||'', label:orig.label||k };
-  });
-
-  var res = await sb.from('content').upsert(rows, { onConflict:'key' });
-  if (res.error) {
-    toast('Erreur : ' + res.error.message, 'error');
-  } else {
-    rows.forEach(function(r) {
-      if (!state.content[r.key]) state.content[r.key] = r;
-      state.content[r.key].value = r.value;
-    });
-    state.dirty = {};
-    updateDirtyBadge();
-    renderSection(state.section);
-    toast('✓ ' + rows.length + ' modification(s) publiée(s).', 'success');
-  }
-  btn.disabled = false;
-  btn.textContent = 'Publier';
-});
-
-// ── DIRTY TRACKING ───────────────────────────────────────────
-function markDirty(key, value) {
-  state.dirty[key] = value;
+// ── LOAD ALL ─────────────────────────────────────────────────────
+async function loadAll(){
+  if(!sb)return;
+  var [cr,sr,pr]=await Promise.all([
+    sb.from('content').select('*'),
+    sb.from('page_sections').select('*').eq('page','home').order('position'),
+    sb.from('pages').select('*').order('created_at'),
+  ]);
+  if(!cr.error)cr.data.forEach(function(r){S.content[r.key]=r;});
+  if(!sr.error)S.sections=sr.data||[];
+  if(!pr.error)S.pages=pr.data||[];
+  buildNav();
+  renderPanel();
   updateDirtyBadge();
 }
-function updateDirtyBadge() {
-  var n = Object.keys(state.dirty).length;
-  var badge = document.getElementById('dirty-badge');
-  if (n > 0) {
-    badge.textContent = n + ' modification(s) non publiée(s)';
-    badge.classList.remove('hidden');
-  } else {
-    badge.classList.add('hidden');
+
+// ── PUBLISH ──────────────────────────────────────────────────────
+async function publish(){
+  if(!sb)return;
+  var btn=document.getElementById('publish-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  var errors=[];
+
+  // 1. Content
+  var contentKeys=Object.keys(S.dirty);
+  if(contentKeys.length){
+    var rows=contentKeys.map(function(k){
+      var orig=S.content[k]||{};
+      return{key:k,value:S.dirty[k],type:orig.type||'text',section:orig.section||'',label:orig.label||k};
+    });
+    var res=await sb.from('content').upsert(rows,{onConflict:'key'});
+    if(res.error)errors.push(res.error.message);
+    else{rows.forEach(function(r){if(!S.content[r.key])S.content[r.key]=r;S.content[r.key].value=r.value;});S.dirty={};}
   }
-  document.getElementById('publish-btn').disabled = (n === 0);
+
+  // 2. Sections order/visibility
+  if(S.dirtySection){
+    var secRows=S.sections.map(function(s){return{page:s.page||'home',section_id:s.section_id,label:s.label,icon:s.icon||'◈',position:s.position,visible:s.visible};});
+    var res2=await sb.from('page_sections').upsert(secRows,{onConflict:'page,section_id'});
+    if(res2.error)errors.push(res2.error.message);
+    else S.dirtySection=false;
+  }
+
+  updateDirtyBadge();
+  btn.disabled=false;btn.textContent='Publier';
+
+  if(errors.length)toast('Erreur : '+errors[0],'error');
+  else toast('✓ Publié avec succès.','success');
 }
 
-// ── SIDEBAR ──────────────────────────────────────────────────
-function renderSidebar() {
-  var sb_ = document.getElementById('sidebar');
-  sb_.innerHTML = '<p class="sidebar-section-label">Sections</p>';
-  SECTIONS.forEach(function(sec) {
-    var item = document.createElement('div');
-    item.className = 'sidebar-item' + (sec.id === state.section ? ' active' : '');
-    item.innerHTML = '<i class="sidebar-icon">' + sec.icon + '</i>' + sec.label;
-    item.addEventListener('click', function() {
-      state.section = sec.id;
-      renderSidebar();
-      renderSection(sec.id);
+// ── PANEL RENDERER ───────────────────────────────────────────────
+function renderPanel(){
+  var panel=document.getElementById('panel');
+  switch(S.view){
+    case 'dashboard':  renderDashboard(panel);  break;
+    case 'pages':      renderPages(panel);      break;
+    case 'sections':   renderSections(panel);   break;
+    case 'content':    renderContent(panel);    break;
+    case 'design':     renderDesign(panel);     break;
+    case 'media':      renderMedia(panel);      break;
+    case 'seo':        renderSEO(panel);        break;
+    case 'settings':   renderSettings(panel);   break;
+    default: panel.innerHTML='';
+  }
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────
+function renderDashboard(panel){
+  var visible=S.sections.filter(function(s){return s.visible;}).length;
+  var total=S.sections.length;
+  var keys=Object.keys(S.content).length;
+  panel.innerHTML=
+    '<div class="panel-head"><h2>Bonjour 👋</h2><p>Gérez votre site Brow Derma depuis ce tableau de bord.</p></div>'+
+    '<div class="stats-row">'+
+      '<div class="stat-card"><div class="stat-val">'+visible+'/'+total+'</div><div class="stat-lbl">Sections visibles</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+S.pages.length+'</div><div class="stat-lbl">Pages</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+keys+'</div><div class="stat-lbl">Contenus</div></div>'+
+    '</div>'+
+    '<div class="panel-head" style="margin-bottom:0"><h2>Actions rapides</h2></div>'+
+    '<div class="quick-actions">'+
+      '<button class="btn btn-ghost" onclick="navigate(\'sections\')">⠿ Mise en page</button>'+
+      '<button class="btn btn-ghost" onclick="navigate(\'content\')">✏ Modifier les textes</button>'+
+      '<button class="btn btn-ghost" onclick="navigate(\'design\')">◑ Couleurs &amp; design</button>'+
+      '<button class="btn btn-ghost" onclick="navigate(\'media\')">⊡ Médiathèque</button>'+
+      '<button class="btn btn-ghost" onclick="navigate(\'seo\')">◎ SEO</button>'+
+    '</div>';
+}
+
+// ── PAGES ────────────────────────────────────────────────────────
+function renderPages(panel){
+  var pagesHtml=S.pages.map(function(p){
+    return '<div class="page-card">'+
+      '<div class="page-status'+(p.published?'':' draft')+'"></div>'+
+      '<div class="page-info"><div class="page-title">'+esc(p.title)+'</div><div class="page-slug">/'+esc(p.slug)+'</div></div>'+
+      '<div class="page-actions">'+
+        '<button class="btn btn-ghost btn-xs" onclick="editPageSections(\''+esc(p.slug)+'\')">Sections</button>'+
+        '<button class="btn btn-ghost btn-xs" onclick="duplicatePage(\''+esc(p.slug)+'\')">Dupliquer</button>'+
+        (p.slug!=='home'?'<button class="btn btn-danger btn-xs" onclick="deletePage(\''+esc(p.id)+'\')">Supprimer</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  panel.innerHTML=
+    '<div class="panel-head"><h2>◻ Pages</h2><p>Gérez les pages de votre site.</p></div>'+
+    '<button class="btn btn-gold btn-sm" style="align-self:flex-start" onclick="showNewPageForm()">+ Nouvelle page</button>'+
+    '<div id="new-page-form-container"></div>'+
+    '<div class="pages-grid">'+pagesHtml+'</div>';
+}
+
+function showNewPageForm(){
+  var c=document.getElementById('new-page-form-container');
+  c.innerHTML='<div class="new-page-form">'+
+    '<div class="cms-field"><label class="cms-label">Titre de la page</label><input class="cms-input" id="np-title" placeholder="Ma nouvelle page"></div>'+
+    '<div class="cms-field"><label class="cms-label">URL (slug) — ex: about, services</label><input class="cms-input" id="np-slug" placeholder="ma-page"></div>'+
+    '<div style="display:flex;gap:.5rem">'+
+      '<button class="btn btn-gold btn-sm" onclick="createPage()">Créer la page</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="this.closest(\'.new-page-form\').remove()">Annuler</button>'+
+    '</div></div>';
+}
+
+async function createPage(){
+  var title=document.getElementById('np-title').value.trim();
+  var slug=document.getElementById('np-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
+  if(!title||!slug){toast('Titre et slug requis','error');return;}
+  var res=await sb.from('pages').insert({slug:slug,title:title,published:true});
+  if(res.error){toast('Erreur : '+res.error.message,'error');return;}
+  toast('Page créée.','success');
+  await loadAll();renderPanel();
+}
+
+async function deletePage(id){
+  if(!confirm('Supprimer cette page ?'))return;
+  await sb.from('pages').delete().eq('id',id);
+  await loadAll();renderPanel();toast('Page supprimée.','info');
+}
+
+async function duplicatePage(slug){
+  var newSlug=slug+'-copie-'+Date.now().toString().slice(-4);
+  var orig=S.pages.find(function(p){return p.slug===slug;});
+  if(!orig)return;
+  await sb.from('pages').insert({slug:newSlug,title:orig.title+' (copie)',published:false});
+  await loadAll();renderPanel();toast('Page dupliquée.','success');
+}
+
+function editPageSections(slug){
+  S.view='sections';
+  buildNav();
+  renderPanel();
+}
+
+// ── SECTIONS MANAGER ─────────────────────────────────────────────
+function renderSections(panel){
+  var html='<div class="panel-head"><h2>⠿ Mise en page</h2><p>Réorganisez et masquez des sections. Glissez-déposez pour réordonner.</p></div>'+
+    '<div id="sections-list"></div>'+
+    '<button class="btn btn-ghost btn-sm" style="align-self:flex-start;margin-top:.5rem" onclick="openAddSectionModal()">+ Ajouter une section</button>';
+  panel.innerHTML=html;
+  renderSectionsList();
+}
+
+function renderSectionsList(){
+  var list=document.getElementById('sections-list');
+  if(!list)return;
+  var sorted=S.sections.slice().sort(function(a,b){return a.position-b.position;});
+  list.innerHTML=sorted.map(function(sec){
+    return '<div class="section-item" draggable="true" data-section="'+esc(sec.section_id)+'">'+
+      '<span class="drag-handle" title="Glisser pour réordonner">⠿</span>'+
+      '<span class="section-icon">'+esc(sec.icon||'◈')+'</span>'+
+      '<span class="section-name">'+esc(sec.label)+'</span>'+
+      '<div class="section-actions">'+
+        '<button class="vis-toggle'+(sec.visible?' on':'')+ '" title="'+(sec.visible?'Masquer':'Afficher')+'" data-section="'+esc(sec.section_id)+'" onclick="toggleSection(\''+esc(sec.section_id)+'\',this)"></button>'+
+        '<button class="btn btn-ghost btn-xs" onclick="editSectionContent(\''+esc(sec.section_id)+'\')">✏ Éditer</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  initSectionDnD();
+}
+
+function toggleSection(sectionId,btn){
+  var sec=S.sections.find(function(s){return s.section_id===sectionId;});
+  if(!sec)return;
+  sec.visible=!sec.visible;
+  btn.classList.toggle('on',sec.visible);
+  btn.title=sec.visible?'Masquer':'Afficher';
+  S.dirtySection=true;
+  updateDirtyBadge();
+}
+
+function editSectionContent(sectionId){
+  // Map section_id → content section id
+  var map={hero:'hero',intro:'intro',prestations:'prestations',tarifs:'tarifs',apropos:'apropos',faq:'faq',contact:'contact'};
+  S.activeContentSection=map[sectionId]||'seo';
+  navigate('content');
+}
+
+// Drag & Drop
+var dragSrc=null;
+function initSectionDnD(){
+  var list=document.getElementById('sections-list');
+  if(!list)return;
+  list.querySelectorAll('.section-item').forEach(function(item){
+    item.addEventListener('dragstart',function(e){
+      dragSrc=item;e.dataTransfer.effectAllowed='move';
+      setTimeout(function(){item.classList.add('dragging');},0);
     });
-    sb_.appendChild(item);
+    item.addEventListener('dragend',function(){
+      item.classList.remove('dragging');
+      list.querySelectorAll('.section-item').forEach(function(i){i.classList.remove('drag-over');});
+    });
+    item.addEventListener('dragover',function(e){
+      e.preventDefault();e.dataTransfer.dropEffect='move';
+      if(dragSrc&&dragSrc!==item)item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave',function(){item.classList.remove('drag-over');});
+    item.addEventListener('drop',function(e){
+      e.preventDefault();
+      if(dragSrc&&dragSrc!==item){
+        var items=Array.from(list.querySelectorAll('.section-item'));
+        var si=items.indexOf(dragSrc),di=items.indexOf(item);
+        if(si<di)list.insertBefore(dragSrc,item.nextSibling);
+        else list.insertBefore(dragSrc,item);
+        item.classList.remove('drag-over');
+        // Update positions in state
+        Array.from(list.querySelectorAll('.section-item')).forEach(function(el,idx){
+          var sec=S.sections.find(function(s){return s.section_id===el.getAttribute('data-section');});
+          if(sec)sec.position=idx+1;
+        });
+        S.dirtySection=true;
+        updateDirtyBadge();
+      }
+    });
   });
 }
 
-// ── SECTION RENDERER ─────────────────────────────────────────
-function renderSection(sectionId) {
-  var sec = SECTIONS.find(function(s){ return s.id === sectionId; });
-  var main = document.getElementById('main-content');
-  if (!sec) return;
+// Section template library
+var SECTION_TEMPLATES=[
+  {id:'text-block',    name:'Bloc texte',    icon:'📝',desc:'Titre + paragraphe'},
+  {id:'cta-band',      name:'Bandeau CTA',   icon:'📢',desc:'Appel à l\'action'},
+  {id:'gallery',       name:'Galerie',       icon:'🖼', desc:'Grille d\'images'},
+  {id:'testimonials',  name:'Témoignages',   icon:'⭐',desc:'Avis clients'},
+  {id:'team',          name:'Équipe',        icon:'👥',desc:'Présentation équipe'},
+  {id:'stats',         name:'Chiffres clés', icon:'📊',desc:'Statistiques'},
+];
 
-  var html = '<div class="section-head">'
-    + '<h2>' + sec.icon + ' ' + sec.label + '</h2>'
-    + '<p>' + sec.desc + '</p>'
-    + '</div><div class="fields-grid">';
+function openAddSectionModal(){
+  var body=document.getElementById('modal-body');
+  body.innerHTML='<div class="section-templates">'+
+    SECTION_TEMPLATES.map(function(t){
+      return '<div class="tpl-card" onclick="addSection(\''+t.id+'\')">'+
+        '<div class="tpl-icon">'+t.icon+'</div>'+
+        '<div class="tpl-name">'+t.name+'</div>'+
+        '<div class="tpl-desc">'+t.desc+'</div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
+  document.getElementById('modal-title').textContent='Ajouter une section';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
 
-  sec.fields.forEach(function(f) {
-    if (!f) { html += '<hr class="fields-divider">'; return; }
-    var val = state.dirty.hasOwnProperty(f.key)
-      ? state.dirty[f.key]
-      : (state.content[f.key] ? state.content[f.key].value : '');
-    var isDirty = state.dirty.hasOwnProperty(f.key);
+async function addSection(tplId){
+  closeModal();
+  var tpl=SECTION_TEMPLATES.find(function(t){return t.id===tplId;});
+  if(!tpl)return;
+  var maxPos=S.sections.reduce(function(m,s){return Math.max(m,s.position);},0);
+  var newSec={page:'home',section_id:tplId+'-'+Date.now(),label:tpl.name,icon:tpl.icon,position:maxPos+1,visible:true};
+  var res=await sb.from('page_sections').insert(newSec);
+  if(res.error){toast('Erreur : '+res.error.message,'error');return;}
+  S.sections.push(newSec);
+  renderSectionsList();
+  toast('Section "'+tpl.name+'" ajoutée.','success');
+}
 
-    html += '<div class="cms-field' + (isDirty ? ' is-dirty' : '') + '" data-key="' + esc(f.key) + '">';
-    html += '<label class="cms-label"><span class="dirty-dot"></span>' + esc(f.label)
-      + ' <span class="type-badge">' + f.type + '</span></label>';
+document.getElementById('modal-close').addEventListener('click',closeModal);
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
 
-    if (f.type === 'text') {
-      html += '<input class="cms-input" type="text" value="' + esc(val) + '" data-key="' + esc(f.key) + '">';
-    } else if (f.type === 'textarea' || f.type === 'html') {
-      html += '<textarea class="cms-textarea' + (f.type === 'html' ? ' html-field' : '') + '" data-key="' + esc(f.key) + '">' + esc(val) + '</textarea>';
-    } else if (f.type === 'image') {
-      html += renderImageField(f.key, val);
-    } else if (f.type === 'faq') {
-      html += renderFaqEditor(val);
+// ── CONTENT EDITOR ────────────────────────────────────────────────
+function renderContent(panel){
+  var tabsHtml=CONTENT_SECTIONS.map(function(sec){
+    return '<button class="section-tab'+(S.activeContentSection===sec.id?' active':'')+ '" onclick="setContentSection(\''+sec.id+'\')">'+sec.label+'</button>';
+  }).join('');
+
+  panel.innerHTML=
+    '<div class="panel-head"><h2>✏ Contenu</h2><p>Modifiez tous les textes et médias du site.</p></div>'+
+    '<div class="section-tabs">'+tabsHtml+'</div>'+
+    '<div id="content-fields"></div>';
+
+  renderContentFields();
+}
+
+function setContentSection(id){
+  S.activeContentSection=id;
+  document.querySelectorAll('.section-tab').forEach(function(t){t.classList.toggle('active',t.textContent===CONTENT_SECTIONS.find(function(s){return s.id===id;}).label);});
+  renderContentFields();
+}
+
+function renderContentFields(){
+  var sec=CONTENT_SECTIONS.find(function(s){return s.id===S.activeContentSection;});
+  var container=document.getElementById('content-fields');
+  if(!sec||!container)return;
+  var html='<div class="fields-grid">';
+  sec.fields.forEach(function(f){
+    if(!f){html+='<hr class="fields-divider">';return;}
+    var val=S.dirty.hasOwnProperty(f.key)?S.dirty[f.key]:(S.content[f.key]?S.content[f.key].value:'');
+    var isDirty=S.dirty.hasOwnProperty(f.key);
+    html+='<div class="cms-field'+(isDirty?' is-dirty':'')+'" data-key="'+esc(f.key)+'">'+
+      '<label class="cms-label"><span class="dirty-dot"></span>'+esc(f.label)+' <span class="type-badge">'+f.type+'</span></label>';
+    if(f.type==='text'){
+      html+='<input class="cms-input" type="text" value="'+esc(val)+'" data-key="'+esc(f.key)+'">';
+    }else if(f.type==='textarea'||f.type==='html'){
+      html+='<textarea class="cms-textarea'+(f.type==='html'?' html-field':'')+'" data-key="'+esc(f.key)+'">'+esc(val)+'</textarea>';
+    }else if(f.type==='image'){
+      html+=renderImageField(f.key,val);
+    }else if(f.type==='faq'){
+      html+=renderFaqEditor(val);
     }
-
-    if (f.hint) html += '<p class="field-hint">' + f.hint + '</p>';
-    html += '</div>';
+    if(f.hint)html+='<p class="field-hint">'+f.hint+'</p>';
+    html+='</div>';
   });
+  html+='</div>';
+  container.innerHTML=html;
 
-  html += '</div>';
-  main.innerHTML = html;
-
-  // Attach change listeners
-  main.querySelectorAll('.cms-input, .cms-textarea').forEach(function(el) {
-    el.addEventListener('input', function() {
-      var key = el.getAttribute('data-key');
-      markDirty(key, el.value);
-      var fieldEl = main.querySelector('.cms-field[data-key="' + key + '"]');
-      if (fieldEl) fieldEl.classList.add('is-dirty');
+  // Listeners
+  container.querySelectorAll('.cms-input,.cms-textarea').forEach(function(el){
+    el.addEventListener('input',function(){
+      var key=el.getAttribute('data-key');
+      markDirty(key,el.value);
+      var fd=container.querySelector('.cms-field[data-key="'+key+'"]');
+      if(fd)fd.classList.add('is-dirty');
     });
   });
 
-  // Image upload button
-  main.querySelectorAll('.img-upload-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var key = btn.getAttribute('data-key');
-      var inp = main.querySelector('.img-file-input[data-key="' + key + '"]');
-      if (inp) inp.click();
+  // Image
+  container.querySelectorAll('.img-upload-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var inp=container.querySelector('.img-file-input[data-key="'+btn.getAttribute('data-key')+'"]');
+      if(inp)inp.click();
     });
   });
-  main.querySelectorAll('.img-file-input').forEach(function(inp) {
-    inp.addEventListener('change', function() {
-      if (inp.files && inp.files[0]) handleImageUpload(inp.getAttribute('data-key'), inp.files[0]);
+  container.querySelectorAll('.img-file-input').forEach(function(inp){
+    inp.addEventListener('change',function(){
+      if(inp.files&&inp.files[0])handleImageUpload(inp.getAttribute('data-key'),inp.files[0]);
     });
   });
-  main.querySelectorAll('.img-url-input').forEach(function(inp) {
-    inp.addEventListener('input', function() {
-      var key = inp.getAttribute('data-key');
-      markDirty(key, inp.value);
-      var prev = main.querySelector('.img-preview-el[data-key="' + key + '"]');
-      if (prev && inp.value) { prev.src = inp.value; prev.style.display = 'block'; }
+  container.querySelectorAll('.img-url-input').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var key=inp.getAttribute('data-key');
+      markDirty(key,inp.value);
+      var prev=container.querySelector('.img-preview-el[data-key="'+key+'"]');
+      if(prev&&inp.value){prev.src=inp.value;prev.style.display='block';}
     });
   });
 
-  // FAQ editor
-  if (sec.id === 'faq') attachFaqListeners();
+  // FAQ
+  if(S.activeContentSection==='faq')attachFaqListeners(container);
 }
 
-function renderImageField(key, val) {
-  var hasImg = val && val.trim();
-  return '<div class="image-field">'
-    + '<div class="image-preview">'
-    + (hasImg
-      ? '<img src="' + esc(val) + '" alt="" class="img-preview-el" data-key="' + esc(key) + '">'
-      : '<span class="no-img">Aucune image</span>')
-    + '</div>'
-    + '<div class="image-actions">'
-    + '<button class="btn btn-outline btn-sm img-upload-btn" data-key="' + esc(key) + '">↑ Uploader</button>'
-    + '<input type="file" accept="image/*" class="img-file-input sr-only" data-key="' + esc(key) + '">'
-    + '<span class="upload-progress" id="up-' + key.replace(/\./g,'-') + '">Envoi…</span>'
-    + '</div>'
-    + '<input type="text" class="cms-input img-url-input" placeholder="ou coller une URL directe…" value="' + esc(val) + '" data-key="' + esc(key) + '">'
-    + '</div>';
+function renderImageField(key,val){
+  var hasImg=val&&val.trim();
+  return '<div class="image-field">'+
+    '<div class="image-preview">'+(hasImg?'<img src="'+esc(val)+'" alt="" class="img-preview-el" data-key="'+esc(key)+'">':'<span class="no-img">Aucune image</span>')+'</div>'+
+    '<div class="image-actions">'+
+      '<button class="btn btn-ghost btn-sm img-upload-btn" data-key="'+esc(key)+'">↑ Uploader</button>'+
+      '<input type="file" accept="image/*" class="img-file-input sr-only" data-key="'+esc(key)+'">'+
+      '<span id="up-'+key.replace(/\./g,'-')+'" style="font-size:.7rem;color:var(--gold);display:none">Envoi…</span>'+
+    '</div>'+
+    '<input type="text" class="cms-input img-url-input" placeholder="ou coller une URL…" value="'+esc(val)+'" data-key="'+esc(key)+'">'+
+  '</div>';
 }
 
-async function handleImageUpload(key, file) {
-  if (!sb) return;
-  var progId = 'up-' + key.replace(/\./g,'-');
-  var prog = document.getElementById(progId);
-  if (prog) prog.style.display = 'inline';
-
-  var ext = file.name.split('.').pop();
-  var name = Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + ext;
-
-  var res = await sb.storage.from('media').upload(name, file, { upsert: true });
-  if (res.error) {
-    toast('Erreur upload : ' + res.error.message, 'error');
-  } else {
-    var pub = sb.storage.from('media').getPublicUrl(name);
-    var url = pub.data.publicUrl;
-    markDirty(key, url);
-    // Update preview
-    var prev = document.querySelector('.img-preview-el[data-key="' + key + '"]');
-    var urlInp = document.querySelector('.img-url-input[data-key="' + key + '"]');
-    if (prev) { prev.src = url; prev.style.display = 'block'; }
-    if (urlInp) urlInp.value = url;
-    toast('Image uploadée.', 'success');
+async function handleImageUpload(key,file){
+  if(!sb)return;
+  var prog=document.getElementById('up-'+key.replace(/\./g,'-'));
+  if(prog)prog.style.display='inline';
+  var ext=file.name.split('.').pop();
+  var name=Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+  var res=await sb.storage.from('media').upload(name,file,{upsert:true});
+  if(res.error){toast('Erreur upload : '+res.error.message,'error');}
+  else{
+    var url=sb.storage.from('media').getPublicUrl(name).data.publicUrl;
+    markDirty(key,url);
+    var prev=document.querySelector('.img-preview-el[data-key="'+key+'"]');
+    var urlInp=document.querySelector('.img-url-input[data-key="'+key+'"]');
+    if(prev){prev.src=url;prev.style.display='block';}
+    if(urlInp)urlInp.value=url;
+    toast('Image uploadée.','success');
   }
-  if (prog) prog.style.display = 'none';
+  if(prog)prog.style.display='none';
 }
 
-// ── FAQ EDITOR ────────────────────────────────────────────────
-function renderFaqEditor(jsonVal) {
-  var items = [];
-  try { items = JSON.parse(jsonVal || '[]'); } catch(e) {}
-  if (!Array.isArray(items)) items = [];
-
-  var html = '<div class="faq-editor" id="faq-editor">';
-  items.forEach(function(item, i) {
-    html += renderFaqPair(item, i);
-  });
-  html += '<button class="btn btn-outline btn-sm faq-add" id="faq-add-btn">+ Ajouter une question</button>';
-  html += '</div>';
+// ── FAQ EDITOR ────────────────────────────────────────────────────
+function renderFaqEditor(jsonVal){
+  var items=[];try{items=JSON.parse(jsonVal||'[]');}catch(e){}
+  if(!Array.isArray(items))items=[];
+  var html='<div class="faq-editor" id="faq-editor">';
+  items.forEach(function(it,i){html+=renderFaqPair(it,i);});
+  html+='<button class="btn btn-ghost btn-sm" id="faq-add-btn" style="margin-top:.3rem">+ Ajouter une question</button></div>';
   return html;
 }
-
-function renderFaqPair(item, i) {
-  return '<div class="faq-pair" data-faq-idx="' + i + '">'
-    + '<p class="faq-pair-num">Question ' + (i+1) + '</p>'
-    + '<div class="faq-pair-row">'
-    + '<input class="cms-input faq-q-input" type="text" placeholder="Question…" value="' + esc(item.q||'') + '">'
-    + '<button class="btn btn-danger btn-sm faq-del-btn" data-idx="' + i + '">Supprimer</button>'
-    + '</div>'
-    + '<textarea class="cms-textarea faq-a-input" placeholder="Réponse…">' + esc(item.a||'') + '</textarea>'
-    + '</div>';
+function renderFaqPair(it,i){
+  return '<div class="faq-pair" data-faq-idx="'+i+'">'+
+    '<p class="faq-pair-num">Question '+(i+1)+'</p>'+
+    '<div class="faq-pair-row"><input class="cms-input faq-q-input" type="text" placeholder="Question…" value="'+esc(it.q||'')+'"><button class="btn btn-danger btn-xs faq-del-btn" data-idx="'+i+'">✕</button></div>'+
+    '<textarea class="cms-textarea faq-a-input" placeholder="Réponse…">'+esc(it.a||'')+'</textarea>'+
+  '</div>';
 }
-
-function getFaqItems() {
-  var pairs = document.querySelectorAll('.faq-pair');
-  var items = [];
-  pairs.forEach(function(pair) {
-    var q = pair.querySelector('.faq-q-input');
-    var a = pair.querySelector('.faq-a-input');
-    if (q && a) items.push({ q: q.value, a: a.value });
-  });
-  return items;
+function getFaqItems(){
+  var pairs=document.querySelectorAll('.faq-pair');var items=[];
+  pairs.forEach(function(p){
+    var q=p.querySelector('.faq-q-input');var a=p.querySelector('.faq-a-input');
+    if(q&&a)items.push({q:q.value,a:a.value});
+  });return items;
 }
-
-function attachFaqListeners() {
-  var editor = document.getElementById('faq-editor');
-  if (!editor) return;
-
-  function onChange() {
-    markDirty('faq.items', JSON.stringify(getFaqItems()));
-    var fieldEl = document.querySelector('.cms-field[data-key="faq.items"]');
-    if (fieldEl) fieldEl.classList.add('is-dirty');
-  }
-
-  editor.querySelectorAll('.faq-q-input, .faq-a-input').forEach(function(el) {
-    el.addEventListener('input', onChange);
-  });
-
-  editor.querySelectorAll('.faq-del-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var idx = parseInt(btn.getAttribute('data-idx'));
-      var items = getFaqItems();
-      items.splice(idx, 1);
-      markDirty('faq.items', JSON.stringify(items));
-      // Re-render editor
-      var edEl = document.getElementById('faq-editor');
-      if (edEl) {
-        var html = items.map(function(it,i){ return renderFaqPair(it,i); }).join('');
-        html += '<button class="btn btn-outline btn-sm faq-add" id="faq-add-btn">+ Ajouter une question</button>';
-        edEl.innerHTML = html;
-        attachFaqListeners();
-      }
+function attachFaqListeners(container){
+  var editor=document.getElementById('faq-editor');if(!editor)return;
+  function onChange(){markDirty('faq.items',JSON.stringify(getFaqItems()));var fd=document.querySelector('.cms-field[data-key="faq.items"]');if(fd)fd.classList.add('is-dirty');}
+  editor.querySelectorAll('.faq-q-input,.faq-a-input').forEach(function(el){el.addEventListener('input',onChange);});
+  editor.querySelectorAll('.faq-del-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=parseInt(btn.getAttribute('data-idx'));var items=getFaqItems();items.splice(idx,1);
+      markDirty('faq.items',JSON.stringify(items));
+      var ed=document.getElementById('faq-editor');
+      if(ed){ed.innerHTML=items.map(function(it,i){return renderFaqPair(it,i);}).join('')+'<button class="btn btn-ghost btn-sm" id="faq-add-btn">+ Ajouter une question</button>';attachFaqListeners(container);}
     });
   });
-
-  var addBtn = document.getElementById('faq-add-btn');
-  if (addBtn) {
-    addBtn.addEventListener('click', function() {
-      var items = getFaqItems();
-      items.push({ q:'', a:'' });
-      markDirty('faq.items', JSON.stringify(items));
-      var edEl = document.getElementById('faq-editor');
-      if (edEl) {
-        var html = items.map(function(it,i){ return renderFaqPair(it,i); }).join('');
-        html += '<button class="btn btn-outline btn-sm faq-add" id="faq-add-btn">+ Ajouter une question</button>';
-        edEl.innerHTML = html;
-        attachFaqListeners();
-        // Focus last Q input
-        var qs = edEl.querySelectorAll('.faq-q-input');
-        if (qs.length) qs[qs.length-1].focus();
-      }
-    });
-  }
-}
-
-// ── UTILITIES ─────────────────────────────────────────────────
-function esc(s) {
-  return String(s||'')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function showConfigWarning() {
-  document.getElementById('login-screen').innerHTML =
-    '<div class="config-warning">'
-    + '<h3>Configuration manquante</h3>'
-    + '<p>Ouvrez <code>cms-config.js</code> et renseignez votre<br>'
-    + '<code>url</code> et <code>key</code> Supabase avant de vous connecter.</p>'
-    + '</div>';
-}
-
-// ── BOOT ──────────────────────────────────────────────────────
-if (!cfgOk) {
-  document.getElementById('login-btn').addEventListener('click', function(e) {
-    e.preventDefault(); showConfigWarning();
+  var add=document.getElementById('faq-add-btn');
+  if(add)add.addEventListener('click',function(){
+    var items=getFaqItems();items.push({q:'',a:''});
+    markDirty('faq.items',JSON.stringify(items));
+    var ed=document.getElementById('faq-editor');
+    if(ed){ed.innerHTML=items.map(function(it,i){return renderFaqPair(it,i);}).join('')+'<button class="btn btn-ghost btn-sm" id="faq-add-btn">+ Ajouter une question</button>';attachFaqListeners(container);var qs=ed.querySelectorAll('.faq-q-input');if(qs.length)qs[qs.length-1].focus();}
   });
-} else {
+}
+
+// ── DESIGN PANEL ─────────────────────────────────────────────────
+function renderDesign(panel){
+  var html='<div class="panel-head"><h2>◑ Design</h2><p>Modifiez les couleurs du site. Les changements sont visibles après publication.</p></div>'+
+    '<div class="design-grid">';
+  DESIGN_COLORS.forEach(function(dc){
+    var val=S.dirty.hasOwnProperty(dc.key)?S.dirty[dc.key]:(S.content[dc.key]?S.content[dc.key].value:'#B8955A');
+    html+='<div class="color-field">'+
+      '<label class="cms-label">'+esc(dc.label)+'</label>'+
+      '<div class="color-row">'+
+        '<button class="color-swatch" style="background:'+esc(val)+'">'+
+          '<input type="color" value="'+esc(val)+'" data-key="'+esc(dc.key)+'" data-var="'+esc(dc.var)+'">'+
+        '</button>'+
+        '<input class="color-val" type="text" value="'+esc(val)+'" data-key="'+esc(dc.key)+'" data-var="'+esc(dc.var)+'" maxlength="7">'+
+      '</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  panel.innerHTML=html;
+
+  // Color picker ↔ text input sync
+  panel.querySelectorAll('input[type=color]').forEach(function(picker){
+    var key=picker.getAttribute('data-key');
+    var varName=picker.getAttribute('data-var');
+    var textInput=panel.querySelector('.color-val[data-key="'+key+'"]');
+    var swatch=picker.parentElement;
+    picker.addEventListener('input',function(){
+      var v=picker.value;
+      if(textInput)textInput.value=v;
+      if(swatch)swatch.style.background=v;
+      markDirty(key,v);
+      // Live preview: update CSS var on site page
+      var fd=panel.querySelector('.cms-field[data-key="'+key+'"]');if(fd)fd.classList.add('is-dirty');
+    });
+    if(textInput){
+      textInput.addEventListener('input',function(){
+        var v=textInput.value.trim();
+        if(/^#[0-9a-fA-F]{6}$/.test(v)){
+          if(picker)picker.value=v;
+          if(swatch)swatch.style.background=v;
+          markDirty(key,v);
+        }
+      });
+    }
+  });
+}
+
+// ── MEDIA LIBRARY ─────────────────────────────────────────────────
+async function renderMedia(panel){
+  panel.innerHTML='<div class="panel-head"><h2>⊡ Médiathèque</h2><p>Gérez vos images et fichiers. Cliquez pour copier l\'URL.</p></div>'+
+    '<div class="upload-zone" id="upload-zone">'+
+      '<div style="font-size:1.5rem">↑</div>'+
+      '<p>Cliquez ou glissez des images ici pour les uploader</p>'+
+    '</div>'+
+    '<input type="file" id="media-file-input" accept="image/*" multiple class="sr-only">'+
+    '<div id="media-grid-container"><p style="color:var(--muted);font-size:.78rem">Chargement…</p></div>';
+
+  // Upload zone events
+  var zone=document.getElementById('upload-zone');
+  var fileInput=document.getElementById('media-file-input');
+  zone.addEventListener('click',function(){fileInput.click();});
+  zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('drag-active');});
+  zone.addEventListener('dragleave',function(){zone.classList.remove('drag-active');});
+  zone.addEventListener('drop',async function(e){
+    e.preventDefault();zone.classList.remove('drag-active');
+    if(e.dataTransfer.files.length)await uploadMediaFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change',async function(){
+    if(fileInput.files.length)await uploadMediaFiles(fileInput.files);
+  });
+
+  await loadMedia();
+}
+
+async function loadMedia(){
+  var container=document.getElementById('media-grid-container');
+  if(!container||!sb)return;
+  var res=await sb.storage.from('media').list('',{limit:100,sortBy:{column:'created_at',order:'desc'}});
+  if(res.error){container.innerHTML='<p style="color:var(--danger)">Erreur : '+esc(res.error.message)+'</p>';return;}
+  S.media=res.data||[];
+  if(!S.media.length){container.innerHTML='<p style="color:var(--muted);font-size:.78rem">Aucun fichier. Uploadez votre première image.</p>';return;}
+  var html='<div class="media-grid">';
+  S.media.forEach(function(file){
+    var url=sb.storage.from('media').getPublicUrl(file.name).data.publicUrl;
+    html+='<div class="media-item" onclick="copyUrl(\''+esc(url)+'\')" title="Cliquer pour copier l\'URL">'+
+      '<img src="'+esc(url)+'" alt="'+esc(file.name)+'" loading="lazy">'+
+      '<div class="media-overlay">'+
+        '<div style="font-size:.7rem;color:#fff">Copier l\'URL</div>'+
+        '<div class="media-filename">'+esc(file.name)+'</div>'+
+        '<button class="btn btn-danger btn-xs" onclick="event.stopPropagation();deleteMedia(\''+esc(file.name)+'\')">Supprimer</button>'+
+      '</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+async function uploadMediaFiles(files){
+  var arr=Array.from(files);
+  for(var i=0;i<arr.length;i++){
+    var file=arr[i];
+    var ext=file.name.split('.').pop();
+    var name=Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+    var res=await sb.storage.from('media').upload(name,file,{upsert:true});
+    if(res.error)toast('Erreur : '+res.error.message,'error');
+    else toast('Fichier uploadé.','success');
+  }
+  await loadMedia();
+}
+
+async function deleteMedia(name){
+  if(!confirm('Supprimer ce fichier ?'))return;
+  await sb.storage.from('media').remove([name]);
+  toast('Supprimé.','info');
+  await loadMedia();
+}
+
+function copyUrl(url){
+  navigator.clipboard.writeText(url).then(function(){toast('URL copiée !','success');}).catch(function(){toast('Impossible de copier','error');});
+}
+
+// ── SEO ──────────────────────────────────────────────────────────
+function renderSEO(panel){
+  var fields=[
+    {key:'seo.title',          label:'Titre de page',              type:'text'},
+    {key:'seo.description',    label:'Meta description',           type:'textarea'},
+    {key:'seo.og_title',       label:'OG Title (réseaux sociaux)', type:'text'},
+    {key:'seo.og_description', label:'OG Description',             type:'textarea'},
+  ];
+  var html='<div class="panel-head"><h2>◎ SEO</h2><p>Optimisez le référencement et le partage sur les réseaux sociaux.</p></div><div class="fields-grid">';
+  fields.forEach(function(f){
+    var val=S.dirty.hasOwnProperty(f.key)?S.dirty[f.key]:(S.content[f.key]?S.content[f.key].value:'');
+    html+='<div class="cms-field" data-key="'+esc(f.key)+'">'+
+      '<label class="cms-label"><span class="dirty-dot"></span>'+esc(f.label)+'</label>';
+    if(f.type==='text')html+='<input class="cms-input" type="text" value="'+esc(val)+'" data-key="'+esc(f.key)+'">';
+    else html+='<textarea class="cms-textarea" data-key="'+esc(f.key)+'">'+esc(val)+'</textarea>';
+    html+='</div>';
+  });
+  html+='</div>';
+  panel.innerHTML=html;
+  panel.querySelectorAll('.cms-input,.cms-textarea').forEach(function(el){
+    el.addEventListener('input',function(){
+      markDirty(el.getAttribute('data-key'),el.value);
+      var fd=panel.querySelector('.cms-field[data-key="'+el.getAttribute('data-key')+'"]');
+      if(fd)fd.classList.add('is-dirty');
+    });
+  });
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────
+function renderSettings(panel){
+  panel.innerHTML=
+    '<div class="panel-head"><h2>⚙ Paramètres</h2><p>Configuration générale du site.</p></div>'+
+    '<div class="fields-grid">'+
+      '<div class="cms-field"><label class="cms-label">URL Supabase</label><input class="cms-input" type="text" value="'+esc(cfg?cfg.url:'')+ '" readonly style="opacity:.5"></div>'+
+      '<div class="cms-field"><label class="cms-label">Clé publique (anon)</label><input class="cms-input" type="text" value="'+esc(cfg?cfg.key.slice(0,20)+'…':'')+ '" readonly style="opacity:.5"></div>'+
+    '</div>'+
+    '<div style="margin-top:1.5rem"><div class="panel-head"><h2>Accès rapide</h2></div>'+
+    '<div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.8rem">'+
+      '<a href="https://supabase.com/dashboard" target="_blank" class="btn btn-ghost btn-sm" style="align-self:flex-start">Ouvrir Supabase ↗</a>'+
+      '<a href="https://vercel.com/dashboard" target="_blank" class="btn btn-ghost btn-sm" style="align-self:flex-start">Ouvrir Vercel ↗</a>'+
+    '</div></div>';
+}
+
+// ── CONFIG WARNING ────────────────────────────────────────────────
+function showConfigWarn(){
+  document.getElementById('login-screen').innerHTML=
+    '<div class="config-warn">'+
+    '<h3>Configuration manquante</h3>'+
+    '<p>Ouvrez <code>cms-config.js</code> et renseignez votre<br><code>url</code> et <code>key</code> Supabase.</p>'+
+    '</div>';
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────
+if(!cfgOk){
+  document.getElementById('login-btn').addEventListener('click',function(e){e.preventDefault();showConfigWarn();});
+}else{
   initSB();
-  sb.auth.getSession().then(function(res) {
-    if (res.data && res.data.session) showDashboard();
+  sb.auth.getSession().then(function(res){
+    if(res.data&&res.data.session){hideLogin();loadAll();}
   });
-  sb.auth.onAuthStateChange(function(event) {
-    if (event === 'SIGNED_OUT') showLogin();
-  });
+  sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_OUT')showLogin();});
 }
 
 updateDirtyBadge();
+buildNav();
+
+// Make navigate global for inline onclick
+window.navigate=navigate;
+window.showNewPageForm=showNewPageForm;
+window.createPage=createPage;
+window.deletePage=deletePage;
+window.duplicatePage=duplicatePage;
+window.editPageSections=editPageSections;
+window.toggleSection=toggleSection;
+window.openAddSectionModal=openAddSectionModal;
+window.addSection=addSection;
+window.setContentSection=setContentSection;
+window.editSectionContent=editSectionContent;
+window.copyUrl=copyUrl;
+window.deleteMedia=deleteMedia;
+
 })();
 </script>
 </body>
